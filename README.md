@@ -1,2 +1,2 @@
-# plangea
+# Plangea
 Plangea
