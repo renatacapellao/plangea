@@ -2,5 +2,5 @@
 
 plangea_prepare_config = function(config_json_location){
   library(jsonlite)
-  teste=fromJSON(config_json_location)
+  config=fromJSON(config_json_location)
 }
