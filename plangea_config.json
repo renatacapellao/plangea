@@ -30,10 +30,11 @@
 		"targets": [5000000, 10000000, "grad"],
 			"sub-region_scenarios": {
 			"include_subregion_scenarios": true,
-			"sub-region names": ["AMZ", "CAA", "CER", "PAN", "MAT", "PAM"],
-			"sub-region_folder": "./sub-regions/",
-			"sub-region_raster_names": ["amazon.tif", "caatinga.tif", "cerrado.tif", "pantanal.tif", "mata_atlantica.tif", "pampas.tif"],
-			"sub-region_targets": [10000000, 200000, 3500000, 20000, 1000000, 180000]
+			"sub-region_folder": "./",
+			"sub-region_raster_name": "biomes-code.tif",
+			"sub-region_names_table": "biomes-code.csv",
+			"sub-region_flat_targets": false,
+			"sub-region_targets": "restoration-targets-per-biome.csv" 
 		}
 	}
 }
