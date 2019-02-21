@@ -1,0 +1,3 @@
+# PLANGEA FUNCTIONS
+
+library(raster)
