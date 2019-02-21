@@ -3,5 +3,5 @@
 plangea_wrapper = function(config_json_location='./plangea_config.json'){
   source('plangea_functions.R')
   
-  cfg = plangea_read_config(config_json_location)
+  cfg = plangea_prepare_config(config_json_location)
 }
