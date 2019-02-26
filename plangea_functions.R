@@ -1,7 +1,10 @@
 # PLANGEA FUNCTIONS
 
 library(raster)
+library(Rsymphony)
+library(Matrix)
 library(jsonlite)
+library(assertthat)
 
 calc_sparable_area = function(projected_areas){
   # Computing overall sparable land vs demanded land
@@ -14,4 +17,10 @@ calc_sparable_area = function(projected_areas){
   projected_areas$total = -projected_areas$total
   
   return(projected_areas)
+}
+
+calc_objective_function = function(var.list, type.list){
+  b = Reduce('+', var.list[type.list=="B"])
+  c = Reduce('+', var.list[type.list=="C"])
+  return(b/c)
 }
