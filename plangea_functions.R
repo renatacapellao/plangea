@@ -1,4 +1,5 @@
-# PLANGEA FUNCTIONS
+# PLANGEA FUNCTIONS -------------------------------------------------------
+
 
 library(raster)
 library(Rsymphony)
