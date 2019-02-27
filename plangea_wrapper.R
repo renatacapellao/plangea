@@ -53,6 +53,9 @@ plangea_wrapper = function(config_json_filename='../plangea-legacy/plangea_confi
   sum.anthropic = 30000000
   targets[[which(sapply(targets, is.na))]] = sum.anthropic
   
-  # PREPROCESSING MODULE
+  # PREPROCESSING MODULE ----------------------------------------------------
   plangea_preprocess(config)
 }
+
+
+
