@@ -25,3 +25,13 @@ calc_objective_function = function(var.list, type.list){
   c = Reduce('+', var.list[type.list=="C"])
   return(b/c)
 }
+
+calc_oc = function(occ, ocg, crp.map, grs.map){occ * crp.map + ocg * grs.map}
+
+load_raster = function(raster.path, master_index=NULL){
+  res = raster(raster.path)
+  res[res<0] = 0
+  res[is.na(res)] = 0
+  if(!is.null(master_index)){res = res[master_index]}
+  return(res)
+}
