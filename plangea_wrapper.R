@@ -6,9 +6,9 @@ plangea_wrapper = function(config_json_filename='../plangea-legacy/plangea_confi
   # Read JSON config file
   config = fromJSON(config_json_filename)
   
-  # Call Harmonize data module
+  # Call Harmonize data module, and store it's output on "data" list
   source('./plangea_harmonize.R')
-  plangea_harmonize(config)
+  data = plangea_harmonize(config)
   
   # List with scenario targets (overall)
   targets=as.numeric(config$scenarios$targets)
