@@ -7,8 +7,14 @@ plangea_wrapper = function(config_json_filename='../plangea-legacy/plangea_confi
   # Read JSON config file
   config = fromJSON(config_json_filename)
   
+  # Call Harmonize data module
+  source('./plangea_harmonize.R')
+  plangea_harmonize(config)
+  
   # List with scenario targets (overall)
-  targets=as.numeric(config$scenarios$targets); names(targets) = config$scenarios$target_names
+  targets=as.numeric(config$scenarios$targets)
+  names(targets) = config$scenarios$target_names
+  targets = as.list(targets)
   
   # Prepare data structures for sub-region analyses if relevant
   if (config$scenarios$`sub-region_scenarios`$include_subregion_scenarios){
@@ -41,13 +47,19 @@ plangea_wrapper = function(config_json_filename='../plangea-legacy/plangea_confi
   # List of number of steps in each benchmark scenario
   nsteps_list = config$scenarios$nsteps_per_benchmark
   
-  #allvar.list = list(cb,bd,oc)
-  #names(allvar.list) = config$variables$variable_names
-  #iter.varnames = config$scenarios$benchmark_scenarios[[5]]
-  #iter.ptr = names(allvar.list) %in% iter.varnames
-  #var.list = allvar.list[iter.ptr]
-  #type.list = config$variables$variable_types[iter.ptr]
-  #iter.obj = calc_objective_function(var.list,type.list)
+  # Code to be used after preprocessing is done - the lines below takes a
+  # named list of variables output by the preprocessing module -- already in
+  # vector format (wrt to a master_index), and named according to
+  # $variables_names -- and computes the objective function
+  # allvar.list = list(cb,bd,oc)
+  # names(allvar.list) = config$variables$variable_names
+  # for (i in 1:length(config$scenarios$benchmark_scenarios)){
+  #   iter.varnames = config$scenarios$benchmark_scenarios[[i]]
+  #   iter.ptr = names(allvar.list) %in% iter.varnames
+  #   var.list = allvar.list[iter.ptr]
+  #   type.list = config$variables$variable_types[iter.ptr]
+  #   iter.obj = calc_objective_function(var.list,type.list)
+  # }
   
   
   sum.anthropic = 30000000

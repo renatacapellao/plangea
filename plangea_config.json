@@ -9,7 +9,7 @@
 		"variable_names": ["cb", "bd", "oc"],   
 		"ready_variables": [true, false, true],  
 		"variable_types": ["B", "B", "C"],  
-		"variable_weights": [1, [1, 10, 100, 1000], 1], 
+		"variable_weights": [1, [0.5, 1, 10, 100, 1000], 1], 
 		"variables_folder": "./variables/",
 		"variable_raster_names": ["carbon.tif", "", "opportunity_costs.tif"]
 	},
