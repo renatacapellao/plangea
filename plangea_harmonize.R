@@ -54,6 +54,7 @@ plangea_harmonize = function(cfg){
   # Loading ready variables
   var.ras.names = cfg$variables$variable_raster_names
   
+<<<<<<< HEAD
   var.vals = lapply(paste0(var.dir, var.ras.names[cfg$variables$ready_variables]),
                     function(x){load_raster(x, master_index)})
   names(var.vals) = cfg$variables$variable_names[cfg$variables$ready_variables]
@@ -85,4 +86,9 @@ plangea_harmonize = function(cfg){
   
   # calc_bd placeholder
   
+=======
+  # List .Rdata files saved in dir
+  #obj.list = dir(dir, full.names=T, pattern='.Rdata', ignore.case=T)
+  # Loads all objects with names in obj.list
+>>>>>>> 82f05d12db99c7fed4f34e3018ec5959b097fe1f
 }

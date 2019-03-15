@@ -1,4 +1,5 @@
-# WRAPPER FOR RUNNING PLANGEA BASED ON AN INPUT JSON CONFIG FILE
+# WRAPPER FOR RUNNING PLANGEA BASED ON AN INPUT JSON CONFIG FILE ----------
+
 
 plangea_wrapper = function(config_json_filename='../plangea-legacy/plangea_config.json'){
   source('plangea_functions.R')
@@ -21,10 +22,12 @@ plangea_wrapper = function(config_json_filename='../plangea-legacy/plangea_confi
     sr_ras = raster(paste0(config$io$preprocessed_data_location_name,
                            config$scenarios$`sub-region_scenarios`$`sub-region_folder`,
                            config$scenarios$`sub-region_scenarios`$`sub-region_raster_name`))
+    
     # Table with sub-region labels for classes in sr_ras
     sr_tbl = read.csv(paste0(config$io$preprocessed_data_location_name,
                              config$scenarios$`sub-region_scenarios`$`sub-region_folder`,
                              config$scenarios$`sub-region_scenarios`$`sub-region_names_table`))
+    
     # Sub-region-targets data.frame
     if (!config$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`){
       sr_targets = calc_sparable_area(read.csv(paste0(config$io$preprocessed_data_location_name,
@@ -62,6 +65,9 @@ plangea_wrapper = function(config_json_filename='../plangea-legacy/plangea_confi
   sum.anthropic = 30000000
   targets[[which(sapply(targets, is.na))]] = sum.anthropic
   
-  # PREPROCESSING MODULE
+  # PREPROCESSING MODULE ----------------------------------------------------
   plangea_preprocess(config)
 }
+
+
+
