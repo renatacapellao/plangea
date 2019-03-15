@@ -44,7 +44,4 @@ plangea_harmonize = function(cfg){
   # List .Rdata files saved in dir
   #obj.list = dir(dir, full.names=T, pattern='.Rdata', ignore.case=T)
   # Loads all objects with names in obj.list
-  #for (i in obj.list){load(i)}
-  
-  
 }
