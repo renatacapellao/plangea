@@ -33,3 +33,17 @@ load_raster = function(raster.path, master_index=NULL){
   if(!is.null(master_index)){res = res[master_index]}
   return(res)
 }
+
+# Mandrake troglodita
+gen.usphab = function(n){
+  res.list = list(c(1, rep(0, n-1)))
+  for (i in 2:n){
+    res.list = c(res.list, lapply(res.list, function(x){x[i]=x[i]+1; return(x)}) )
+  }
+  back.list = list(c(rep(0, n)))
+  for (i in n:2){
+    back.list = c(back.list, lapply(back.list, function(x){x[i]=x[i]+1; return(x)}) )
+  }
+  res.list = unique(c(res.list, back.list))
+  matrix(unlist(res.list[!sapply(res.list, function(x){sum(x)}) == 0]), ncol=n)
+}

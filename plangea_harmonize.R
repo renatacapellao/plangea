@@ -5,6 +5,7 @@ plangea_harmonize = function(cfg){
   base.dir = cfg$io$base_path
   rawdata.dir = paste0(base.dir, cfg$io$rawdata_path)
   lu.dir = paste0(rawdata.dir, cfg$io$lu_path)
+  past.lu.dir = paste0(rawdata.dir, cfg$io$lu_path, cfg$io$past_lu_path)
   var.dir = paste0(rawdata.dir, cfg$io$variables_path)
   spp.dir = paste0(rawdata.dir, cfg$io$species_path)
   in.dir = paste0(base.dir, cfg$io$preprocessed_path)
@@ -51,7 +52,6 @@ plangea_harmonize = function(cfg){
   # Building master_index of pixels of interest
   master_index = which(values(interest.areas > 0))
   
-  
   # Creating list with raster values corresponding to the master_index
   lu.vals = lapply(lu.ras, function(x){x[master_index]})
   
@@ -70,7 +70,8 @@ plangea_harmonize = function(cfg){
   # Include in allvar list the variables already loaded
   allvar.list[names(allvar.list) %in% names(var.vals)] = var.vals
   
-
+  
+  # Opportunity cost ---------------------------------------------------------
   # Computing opportunity costs, if: (a) oc is not labeled as ready in
   # $ready_variables, and if (b) the required rasters are in the right folder
   if (!cfg$variables$ready_variables[cfg$variables$variable_names %in%
@@ -86,12 +87,28 @@ plangea_harmonize = function(cfg){
   } # end of calc_oc if statement
   
   
+  # Original areas (OA) ---------------------------------------------------------
+  past.lu.vals = NULL
   
+  if (cfg$landscape_features$original_areas$include_past){
+    past.names = cfg$landscape_features$original_areas$past_raster_names
+    past.lu.vals = lapply(paste0(past.lu.dir, past.names), function(x){load_raster(x, master_index)})
+    names(past.lu.vals) = cfg$landscape_features$original_areas$past_class_names
+  }
+    
+  source('plangea_calc_oa.R')
+    
+  oa.vals = plangea_calc_oa(lu.vals, past.lu.vals, lu.class.types)
+    
+
+  # Biodiversity ---------------------------------------------------------
   # calc_bd placeholder
-  
+
+    
 #=======
   # List .Rdata files saved in dir
   #obj.list = dir(dir, full.names=T, pattern='.Rdata', ignore.case=T)
   # Loads all objects with names in obj.list
 #>>>>>>> 82f05d12db99c7fed4f34e3018ec5959b097fe1f
-}
+  
+} # end of plangea_harmonize function
