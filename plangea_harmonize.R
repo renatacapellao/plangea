@@ -6,6 +6,7 @@ plangea_harmonize = function(cfg){
   rawdata.dir = paste0(base.dir, cfg$io$rawdata_path)
   lu.dir = paste0(rawdata.dir, cfg$io$lu_path)
   past.lu.dir = paste0(rawdata.dir, cfg$io$lu_path, cfg$io$past_lu_path)
+  er.dir = paste0(rawdata.dir, cfg$io$lu_path, cfg$io$ecoregions_path)
   var.dir = paste0(rawdata.dir, cfg$io$variables_path)
   spp.dir = paste0(rawdata.dir, cfg$io$species_path)
   in.dir = paste0(base.dir, cfg$io$preprocessed_path)
@@ -85,6 +86,17 @@ plangea_harmonize = function(cfg){
       list(plangea_calc_oc(cfg, lu.val.list=lu.vals, master_index=master_index))
     
   } # end of calc_oc if statement
+
+  # Ecoregions maps ------------------------------------------------------------
+  # Load land-use rasters names
+  er.ras.names = dir(er.dir)[dir(er.dir) %in% cfg$landscape_features$original_areas$ecoregions_raster_names]
+  
+  # Re-ordering to ensure the object created follows order in config file
+  er.ras.names = er.ras.names[match(cfg$landscape_features$original_areas$ecoregions_raster_names, er.ras.names)]
+  
+  # Ecoregion maps required to deal with areas without natural-area remnants
+  er.maps = lapply(paste0(er.dir, er.ras.names), function(x){load_raster(x, master_index)})
+  names(er.maps) = cfg$landscape_features$original_areas$past_class_names
   
   
   # Original areas (OA) ---------------------------------------------------------
@@ -95,14 +107,19 @@ plangea_harmonize = function(cfg){
     past.lu.vals = lapply(paste0(past.lu.dir, past.names), function(x){load_raster(x, master_index)})
     names(past.lu.vals) = cfg$landscape_features$original_areas$past_class_names
   }
-    
+  
   source('plangea_calc_oa.R')
     
-  oa.vals = plangea_calc_oa(lu.vals, past.lu.vals, lu.class.types)
+  oa.vals = plangea_calc_oa(c.lu.maps = lu.vals, er.maps = er.maps,
+                            p.lu.maps = past.lu.vals, lu.type = lu.class.types,
+                            tolerance=1.e-7)
     
 
   # Biodiversity ---------------------------------------------------------
-  # calc_bd placeholder
+  
+  source('plangea_calc_bd.R')
+  
+  bd = plangea_calc_bd(cfg, lu.vals, master_index, oa.vals)
 
     
 #=======

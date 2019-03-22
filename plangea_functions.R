@@ -34,16 +34,44 @@ load_raster = function(raster.path, master_index=NULL){
   return(res)
 }
 
-# Mandrake troglodita
-gen.usphab = function(n){
-  res.list = list(c(1, rep(0, n-1)))
-  for (i in 2:n){
-    res.list = c(res.list, lapply(res.list, function(x){x[i]=x[i]+1; return(x)}) )
+gen_usphab = function(n){
+  res = as.matrix(expand.grid(replicate(n, 0:1, simplify = F)), ncol=n)
+  res = res[rowSums(res == rep(0,n))!=5,] # removing solution with all zeroes
+}
+
+# Legacy calc.bd ------------------------------------------------------------
+calc.bd <- function(slp){
+  bd <- rep(0, np)
+  for (i in 1:dim(usphab_proc)[1]){
+    hab.values <- prop.restore %*% usphab_proc[i,]
+    if(length(usphab_index[[i]])>0){
+      for (j in 1:length(usphab_index[[i]])){
+        if (!is.null(species_index_list_proc[[usphab_index[[i]][j]]])){
+          recs <- species_index_list_proc[[usphab_index[[i]][j]]]
+          bd[recs] <- bd[recs] + slp[usphab_index[[i]][j]] * hab.values[recs]
+        }
+      }      
+    }
   }
-  back.list = list(c(rep(0, n)))
-  for (i in n:2){
-    back.list = c(back.list, lapply(back.list, function(x){x[i]=x[i]+1; return(x)}) )
-  }
-  res.list = unique(c(res.list, back.list))
-  matrix(unlist(res.list[!sapply(res.list, function(x){sum(x)}) == 0]), ncol=n)
+  bd <- bd * g_scalar_bd
+  return(bd)
+}
+
+# Legacy computation of extinction risk --------------------------------------
+# function to calculate extinction risk
+# A: current area
+# Amax: maximum potential area
+extinction.risk <- function(A, Amax, z=0.25){
+  r <- 1 - (A/Amax)^z
+  recs <- which(r < 0)
+  if (length(recs) > 0) r[recs] <- 0
+  return(r)
+}
+
+# Legacy computation of extinction risk slope --------------------------------
+calc.extinction.slope <- function(A, Amax, z=0.25){
+  er1 <- extinction.risk(A, Amax, z=z)
+  er2 <- extinction.risk(A+1E-6, Amax, z=z)
+  res <- (er2 - er1) / 1E-6	
+  return(abs(res))
 }
