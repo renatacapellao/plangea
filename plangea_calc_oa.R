@@ -11,6 +11,9 @@ plangea_calc_oa =  function(c.lu.maps, er.maps, p.lu.maps=NULL, lu.types, tolera
   # Total current anthropic area in each pixel
   c.anth.map = Reduce('+', c.lu.maps[lu.types == "A"])
   
+  # Condition for applying ecoregion classes: no past natural or current anthropic above 95%
+  corr.cond = ( (Reduce('+', p.lu.maps)==0) | (c.anth.map>0.95) )
+  
   # Proportion of past natural area in each pixel
   p.nat.maps = lapply(p.lu.maps, function(x){x / Reduce('+', p.lu.maps)})
 
@@ -23,9 +26,6 @@ plangea_calc_oa =  function(c.lu.maps, er.maps, p.lu.maps=NULL, lu.types, tolera
   # Computing original areas
   oa.maps = mapply('+', c.lu.maps[lu.types == "N"], c.conv.map, SIMPLIFY=F)
 
-  # Condition for applying ecoregion classes: no past natural or current anthropic above 95%
-  corr.cond = ( (Reduce('+', p.lu.maps)==0) | (c.anth.map>0.95) )
-  
   # Checking that original areas sum to 1 within given tolerance  
   check.oa = Reduce('+', c(oa.maps, list(Reduce('+', c.lu.maps[lu.types=='I']))))
   n.problems = length(which((check.oa -1) > tolerance))

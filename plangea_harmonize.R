@@ -1,20 +1,5 @@
 
 plangea_harmonize = function(cfg){
-  # Directory names ---------------------------------------------------------
-  # set the directory names from which to load all the data for the optimisation
-  base.dir = cfg$io$base_path
-  rawdata.dir = paste0(base.dir, cfg$io$rawdata_path)
-  lu.dir = paste0(rawdata.dir, cfg$io$lu_path)
-  past.lu.dir = paste0(rawdata.dir, cfg$io$lu_path, cfg$io$past_lu_path)
-  er.dir = paste0(rawdata.dir, cfg$io$lu_path, cfg$io$ecoregions_path)
-  var.dir = paste0(rawdata.dir, cfg$io$variables_path)
-  spp.dir = paste0(rawdata.dir, cfg$io$species_path)
-  in.dir = paste0(base.dir, cfg$io$preprocessed_path)
-  out.dir = paste0(base.dir, cfg$io$output_path)
-
-
-
-  
   # Land-use ---------------------------------------------------------
   # Load land-use rasters names
   lu.ras.names = dir(lu.dir)[dir(lu.dir) %in% cfg$landscape_features$land_use$classes_raster_names]
@@ -64,6 +49,8 @@ plangea_harmonize = function(cfg){
                     function(x){load_raster(x, master_index)})
   names(var.vals) = cfg$variables$variable_names[cfg$variables$ready_variables]
   
+  
+  # All-variables list -------------------------------------------------------
   # Build list of all variables
   allvar.list = as.list(cfg$variables$variable_names)
   names(allvar.list) = allvar.list
@@ -81,12 +68,14 @@ plangea_harmonize = function(cfg){
       length(cfg$variables$calc_oc$oc_names))){ # condition (b)
     
     source('plangea_calc_oc.R')
-  
+    
+    # Including opportunity cost into allvar.list
     allvar.list[names(allvar.list) %in% cfg$variables$calc_oc$oc_variable_name]=
       list(plangea_calc_oc(cfg, lu.val.list=lu.vals, master_index=master_index))
     
   } # end of calc_oc if statement
 
+  
   # Ecoregions maps ------------------------------------------------------------
   # Load land-use rasters names
   er.ras.names = dir(er.dir)[dir(er.dir) %in% cfg$landscape_features$original_areas$ecoregions_raster_names]
@@ -119,8 +108,13 @@ plangea_harmonize = function(cfg){
   
   source('plangea_calc_bd.R')
   
-  bd = plangea_calc_bd(cfg, lu.vals, master_index, oa.vals)
+  bd = plangea_calc_bd(cfg = cfg, lu.vals = lu.vals,
+                       master_index = master_index, oa.vals = oa.vals)
+  
+  # Including biodiversity benefits into allvar.list
+  allvar.list[names(allvar.list) %in% cfg$variables$calc_bd$bd_variable_name] = list(bd)
 
+  return(allvar.list)
     
 #=======
   # List .Rdata files saved in dir
