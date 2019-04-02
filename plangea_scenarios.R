@@ -41,12 +41,12 @@ plangea_scenarios = function(cfg, allvar.list){
   # $variables_names -- and computes the objective function
   # allvar.list = list(cb,bd,oc)
   # names(allvar.list) = config$variables$variable_names
-  # for (i in 1:length(config$scenarios$benchmark_scenarios)){
-  #   iter.varnames = config$scenarios$benchmark_scenarios[[i]]
-  #   iter.ptr = names(allvar.list) %in% iter.varnames
-  #   var.list = allvar.list[iter.ptr]
-  #   type.list = config$variables$variable_types[iter.ptr]
-  #   iter.obj = calc_objective_function(var.list,type.list)
+  # for (i in 1:length(cfg$scenarios$benchmark_scenarios)){
+  #   iter_varnames = cfg$scenarios$benchmark_scenarios[[i]]
+  #   iter_ptr = names(allvar_list) %in% iter_varnames
+  #   var_list = allvar_list[iter_ptr]
+  #   type_list = cfg$variables$variable_types[iter_ptr]
+  #   iter_obj = calc_objective_function(var_list,type_list)
   # }
 
   sum_anthropic = 30000000

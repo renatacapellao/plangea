@@ -23,6 +23,7 @@ calc_sparable_area = function(projected_areas){
 calc_objective_function = function(var_list, type_list){
   b = Reduce('+', var_list[type_list=="B"])
   c = Reduce('+', var_list[type_list=="C"])
+  if (is.null(c)){c=1}
   return(b/c)
 }
 
