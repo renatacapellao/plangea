@@ -95,7 +95,6 @@ plangea_calc_bd = function(cfg, lu.vals, master_index, oa.vals=NULL){
   # species_index_list_proc computation ----------------------------------
   species_index_list_proc = lapply(spp.vals, function(x){which(x==1)})
   
-  #
   np = length(master_index)
   hab.now.areas = sapply(hab.now.vals, sum)
   hab.pot.areas = sapply(hab.pot.vals, sum)
@@ -109,9 +108,9 @@ plangea_calc_bd = function(cfg, lu.vals, master_index, oa.vals=NULL){
   hab.now.areas = hab.now.areas[valid_spid_ptr]
   hab.pot.areas = hab.pot.areas[valid_spid_ptr]
   
-  bd = calc.bd(calc.extinction.slope(hab.now.areas, hab.pot.areas))
+  bd = calc.bd(slp = calc.extinction.slope(hab.now.areas, hab.pot.areas),
+               np, prop.restore, usphab_proc, usphab_index,
+               species_index_list_proc, g_scalar_bd)
   
-  return(list(bd = bd, species_vars=list(usphab_proc=usphab_proc,
-                                         usphab_index=usphab_index,
-                                         species_index_list_proc=species_index_list_proc)))
+  return(bd)
 }

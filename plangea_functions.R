@@ -40,7 +40,8 @@ gen_usphab = function(n){
 }
 
 # Legacy calc.bd ------------------------------------------------------------
-calc.bd <- function(slp){
+calc.bd <- function(slp, np, prop.restore, usphab_proc, usphab_index,
+                    species_index_list_proc, g_scalar_bd){
   bd <- rep(0, np)
   for (i in 1:dim(usphab_proc)[1]){
     hab.values <- prop.restore %*% usphab_proc[i,]

@@ -1,40 +1,100 @@
 {
 	"io": {
-		"rawdata_path": "./rawdata/",
-		"preprocessed_data_location_name": "inputdir",
-		"output_path": "./results/"
+	  "base_path": "~/Documents/IIS_PROJECTS/plangea/",
+		"rawdata_path": "rawdata/",
+		"lu_path": "land-use/",
+		"past_lu_path": "past/",
+		"ecoregions_path": "ecoregions/",
+		"variables_path": "variables/",
+		"species_path": "species/placeholder_for_dev/",
+		"processed_path": "processed/",
+		"output_path": "results/"
 	},
 
 	"variables": {
 		"variable_names": ["cb", "bd", "oc"],   
-		"ready_variables": [true, false, true],  
+		"ready_variables": [true, true, false],  
 		"variable_types": ["B", "B", "C"],  
-		"variable_weights": [1, [0.5, 1, 10, 100, 1000], 1], 
-		"variables_folder": "./variables/",
-		"variable_raster_names": ["carbon.tif", "", "opportunity_costs.tif"]
+		"variable_weights": [1, [1, 10, 100, 1000], 1],
+		"variable_scaling_factor": [1e-3, 1e2, 1e-4],
+		"variable_raster_names": [
+		  "DELTA_C_BiomassSoil30cm_v12.1.tif",
+		  "opportunity_costs_cropland_4.9km_Molweide.tif",
+		  ""
+		  ],
+		"calc_oc": {
+		  "oc_variable_name": "oc",
+		  "oc_names": ["occ", "ocg"],
+		  "corresponding_lu_classes": ["AGR", "CGR"],
+		  "oc_files": [
+		    "opportunity_costs_cropland_4.9km_Molweide.tif",
+		    "opportunity_costs_grassland_4.9km_Molweide.tif"
+		  ]
+		},
+		"calc_bd": {
+		  "bd_variable_name": "bd",
+		  "bd_classes": ["M", "A", "B"],
+		  "bd_subfolders": ["raster_mammals", "raster_amphibians", "raster_birds"],
+		  "spp_table": {
+		    "spp_filename": "Habitats_marginal_excluded_habitats_selected.csv",
+		    "spp_names_column": "taxonid",
+		    "lu_names_column": "habitat_class"
+		  }
+		}
 	},
 
-	"land-use_classes": {
-		"class_names": ["FOR", "NGR", "SHR", "DES", "WET", "AGR", "CGR", "PFO", "WAT", "NRE"],
-		"class_types": ["N", "N", "N", "N", "N", "A", "A", "A", "I", "I"],  
-		"class_folder": "./land-use/",
-		"classes_raster_names": ["forest.tif", "nat_grassland.tif", "shrubland.tif", "desert.tif", "wetland.tif", "cult_grassland.tif", "planted_forest.tif", "water_bodies.tif", "non-restorable.tif"]
+	"landscape_features": {
+	  "land_use":{
+	    "class_names": ["FOR", "NGR", "SHR", "DES", "WET", "AGR", "CGR", "WAT", "ICE", "URB"],
+	  	"class_types": ["N", "N", "N", "N", "N", "A", "A", "I", "I", "I"],  
+	  	"classes_raster_names": [
+	  	  "ESA_landuse_300m_2015_forest_media_4.9km_Molweide.tif",
+	  	  "NatGrass_2015_4.9km_Moll.tif",
+	  	  "ESA_landuse_300m_2015_shrubland_media_4.9km_Molweide.tif",
+	  	  "ESA_landuse_300m_2015_desert_media_4.9km_Molweide.tif",
+	  	  "ESA_landuse_300m_2015_wetlands_media_4.9km_Molweide.tif",
+	  	  "crop_final.tif",
+	  	  "culgrass_final.tif",
+	  	  "ESA_landuse_300m_2015_water_media_4.9km_Molweide.tif",
+	  	  "ESA_landuse_300m_2015_ice_media_4.9km_Molweide.tif",
+	  	  "ESA_landuse_300m_2015_urban_media_4.9km_Molweide.tif"
+	  	]  
+	  },
+	  "original_areas":{
+	    "include_past": true,
+	    "past_class_names": ["DES", "FOR", "NGR", "SHR", "WET"],
+	    "past_raster_names":[
+	      "ESA_landuse_300m_1992_desert_media_4.9km_Molweide.tif",
+	      "ESA_landuse_300m_1992_forest_media_4.9km_Molweide.tif",
+	      "NatGrass_1992_4.9km_Moll.tif",
+	      "ESA_landuse_300m_1992_shrubland_media_4.9km_Molweide.tif",
+	      "ESA_landuse_300m_1992_wetlands_media_4.9km_Molweide.tif"
+	    ],
+	    "ecoregions_raster_names": [
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_desert.tif",
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_forest.tif",
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_Nat_grass.tif",
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_Shrubland.tif",
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_wetland.tif"
+	    ]
+	  },
+	  "area_scaling_factor": 1e-4
 	},
 
 	"scenarios": {
 		"problem_type": "R", 
-		"include_OA": false,
 		"benchmark_scenarios": ["cb", "bd", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
 		"nsteps_per_benchmark": [1, 10, 1, 10, 1, 10, 10],
-		"target_names": ["planaveg","dobro","brasil"], 
-		"targets": [5000000, 10000000, "grad"],
-			"sub-region_scenarios": {
+		"target_names": ["BONN", "NYDC", "CTRY", "CBD", "CBD2", "WRLD"],
+		"targets": ["1.5e6", "3.5e6", "13.3719e6", "12.7e6", "25.4e6", "8466e6"],
+		"sub-region_scenarios": {
 			"include_subregion_scenarios": true,
-			"sub-region_folder": "./",
-			"sub-region_raster_name": "biomes-code.tif",
-			"sub-region_names_table": "biomes-code.csv",
+			"sub-region_folder": "",
+			"sub-region_raster_name": "countries-code.tif",
+			"sub-region_names_table": "countries-code.csv",
 			"sub-region_flat_targets": false,
-			"sub-region_targets": "restoration-targets-per-biome.csv" 
+			"sub-region_targets": "restoration-constraints-per-country-total.csv" 
+		},
+		"upper_bounds_limits": [0.33, 0.67, 1]
 		}
-	}
 }
