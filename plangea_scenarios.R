@@ -49,7 +49,7 @@ plangea_scenarios = function(cfg, allvar.list){
   #   iter.obj = calc_objective_function(var.list,type.list)
   # }
 
-  sum.anthropic = 30000000
-  targets[[which(sapply(targets, is.na))]] = sum.anthropic
+  sum_anthropic = 30000000
+  targets[[which(sapply(targets, is.na))]] = sum_anthropic
   
 } # end of plangea_scenarios function
