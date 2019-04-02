@@ -9,30 +9,30 @@ plangea_wrapper = function(config_json_filename='plangea_config.json'){
   
   # Directory names ---------------------------------------------------------
   # set the directory names from which to load all the data for the optimisation
-  base.dir = cfg$io$base_path
-  rawdata.dir = paste0(base.dir, cfg$io$rawdata_path)
-  lu.dir = paste0(rawdata.dir, cfg$io$lu_path)
-  past.lu.dir = paste0(rawdata.dir, cfg$io$lu_path, cfg$io$past_lu_path)
-  er.dir = paste0(rawdata.dir, cfg$io$lu_path, cfg$io$ecoregions_path)
-  var.dir = paste0(rawdata.dir, cfg$io$variables_path)
-  spp.dir = paste0(rawdata.dir, cfg$io$species_path)
-  in.dir = paste0(base.dir, cfg$io$preprocessed_path)
-  out.dir = paste0(base.dir, cfg$io$output_path)
+  base_dir = cfg$io$base_path
+  rawdata_dir = paste0(base_dir, cfg$io$rawdata_path)
+  lu_dir = paste0(rawdata_dir, cfg$io$lu_path)
+  past_lu_dir = paste0(rawdata_dir, cfg$io$lu_path, cfg$io$past_lu_path)
+  er_dir = paste0(rawdata_dir, cfg$io$lu_path, cfg$io$ecoregions_path)
+  var_dir = paste0(rawdata_dir, cfg$io$variables_path)
+  spp_dir = paste0(rawdata_dir, cfg$io$species_path)
+  in_dir = paste0(base_dir, cfg$io$preprocessed_path)
+  out_dir = paste0(base_dir, cfg$io$output_path)
   
   
   # Harmonize data module ----------------------------------------------------
   source('plangea_harmonize.R')
-  allvar.list = plangea_harmonize(cfg)
+  allvar_list = plangea_harmonize(cfg)
   
   
   # Scenarios module ---------------------------------------------------------
   source('plangea_scenarios.R')
-  scen.list = plangea_scenarios(cfg, allvar.list)
+  scen_list = plangea_scenarios(cfg, allvar_list)
   
   
   # Run-optimization module --------------------------------------------------
   source('plangea_call_solver.R')
-  res = plangea_call_solver(cfg, allvar.list, scen.list)
+  res = plangea_call_solver(cfg, allvar_list, scen_list)
   
   return(res)
 }
