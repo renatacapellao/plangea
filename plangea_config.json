@@ -39,7 +39,8 @@
 		    "spp_filename": "Habitats_marginal_excluded_habitats_selected.csv",
 		    "spp_names_column": "taxonid",
 		    "lu_names_column": "habitat_class"
-		  }
+		  },
+		  "z_std_dev": "0.1"
 		}
 	},
 
@@ -93,6 +94,7 @@
 			"sub-region_raster_name": "countries-code.tif",
 			"sub-region_names_table": "countries-code.csv",
 			"sub-region_flat_targets": false,
+			"sub-region_flat_targets_limits": 1,
 			"sub-region_targets": "restoration-constraints-per-country-total.csv" 
 		},
 		"upper_bounds_limits": [0.33, 0.67, 1]

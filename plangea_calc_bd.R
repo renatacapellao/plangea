@@ -80,7 +80,7 @@ plangea_calc_bd = function(cfg, lu_vals, master_index, oa_vals=NULL){
     
     # usphab_index computation ---------------------------------------------    
     # Corresponding entry on usphab_proc rows for spid
-    spid_proc = as_numeric(nat_cls %in% spid_lu)
+    spid_proc = as.numeric(nat_cls %in% spid_lu)
     
     # Identifying which row in usphab_proc corresponds to spid_proc
     spid_proc_row = which(rowSums(t(sapply(1:nrow(usphab_proc),

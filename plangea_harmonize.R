@@ -52,7 +52,7 @@ plangea_harmonize = function(cfg){
   
   # All-variables list -------------------------------------------------------
   # Build list of all variables
-  allvar_list = as_list(cfg$variables$variable_names)
+  allvar_list = as.list(cfg$variables$variable_names)
   names(allvar_list) = allvar_list
   
   # Include in allvar list the variables already loaded

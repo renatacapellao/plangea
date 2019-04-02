@@ -3,7 +3,7 @@ plangea_calc_oa =  function(c_lu_maps, er_maps, p_lu_maps=NULL, lu_types, tolera
   # p_lu_maps: past land-use list of rasters or indexed vectors of "N" types only
   # lu_types: for each lu in the maps above, a single letter:
   #  "N" for natural, "A" for anthropic, "I" for ignore
-  if (is_null(p_lu_maps)){p_lu_maps = c_lu_maps[lu_types == "N"]}
+  if (is.null(p_lu_maps)){p_lu_maps = c_lu_maps[lu_types == "N"]}
   
   # Making sure p_lu_maps are ordered the same way as c_lu_maps[lu_types=="N"]
   p_lu_maps = p_lu_maps[match(names(c_lu_maps)[lu_types=="N"], names(p_lu_maps))]
