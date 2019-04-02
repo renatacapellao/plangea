@@ -42,7 +42,7 @@ plangea_calc_bd = function(cfg, lu_vals, master_index, oa_vals=NULL){
   names(spp_vals) = sub(x=unlist(raster_names), pattern='.tif', replacement='')
   
   # Loading list of suitable land-uses for each species
-  spp_table = read_csv(paste0(spp_dir, cfg$variables$calc_bd$spp_table$spp_filename))
+  spp_table = read.csv(paste0(spp_dir, cfg$variables$calc_bd$spp_table$spp_filename))
   
   # Creating list of species ID that have entries in both spp_vals and spp_table
   spid_list = names(spp_vals)[names(spp_vals) %in%
