@@ -1,56 +1,67 @@
 
-plangea_harmonize = function(cfg){
-  # Land-use ---------------------------------------------------------
-  # Load land-use rasters names
-  lu_ras_names = dir(lu_dir)[dir(lu_dir) %in% cfg$landscape_features$land_use$classes_raster_names]
+plangea_harmonize = function(cfg, config_json_filename){
   
-  # Re-ordering to ensure the object created follows order in config file
-  lu_ras_names = lu_ras_names[match(cfg$landscape_features$land_use$classes_raster_names, lu_ras_names)]
+  # Structures for controling changes ------------------------------------
   
-  # Creating raster stack with rasters corresponding to LU names
-  #lu_ras = stack(paste0(lu_dir, lu_ras_names))
-  lu_ras = lapply(paste0(lu_dir, lu_ras_names), function(x){load_raster(x)})
-  names(lu_ras) = cfg$landscape_features$land_use$class_names
-
-  # Load land-use class types
-  # Possible types of LU: "N"atural, "A"nthropic, "I"gnore
-  lu_class_types = cfg$landscape_features$land_use$class_types  
-
-  # Building raster with terrestrial areas
-  terrestrial_areas = Reduce('+', lu_ras[lu_class_types %in% c("N", "A")])
+  # Creating / Loading log file
+  if (file.exists(paste0(in_dir, 'harmonize_log.Rdata'))){
+    load(paste0(in_dir, 'harmonize_log.Rdata'))
+  } else {
+      harmonize_log = list(json = present_json_info)
+      save(harmonize_log, file = (paste0(in_dir, 'harmonize_log.Rdata')))
+    }
   
-  # Builds index with terrestrial pixels
-  terrestrial_index = which(values(terrestrial_areas > 0))
+  # Creating control-flags data.frame for updated input files
+  update_flag = data.frame(lu=F)
+  
+  # Reading backup config file
+  if(file.exists(paste0(in_dir, 'cfg_bk.Rdata'))){
+    load(paste0(in_dir, 'cfg_bk.Rdata'))
+    } else {cfg_bk = cfg}
+  
+  
+  # Land-use / Terrestrial Index -----------------------------------------
+  present_lu_info = file.info(dir(lu_dir, full.names = T)[dir(lu_dir) %in% cfg$landscape_features$land_use$classes_raster_names], extra_cols = F)
+  
+  if(is.null(harmonize_log$lu)){harmonize_log$lu = present_lu_info}   # in case the script is running for the 1st time
+  
+  if ((nrow(present_lu_info) != nrow(harmonize_log$lu)) |             # number of files is not the same or
+      (prod(present_lu_info$ctime != harmonize_log$lu$ctime)==1) |    # creation times are not the same or
+      (!file.exists(paste0(in_dir, 'harmonize_lu.Rdata')))            # resulting processed data file not found
+      ){
+    source('plangea_harmonize_lu.R')
+    lu_res = plangea_harmonize_lu(cfg)
+    harmonize_log$lu = lu_res$lu_log
+    update_flag$lu = T
+  } else {
+    load(paste0(in_dir, 'harmonize_lu.Rdata'))
+    update_flag$lu = F
+    }
+  
   
   # Master Index ---------------------------------------------------------
-  # Loading type of optimisation problem
-  # Possible types of optimisation: "C"onservation, "R"estoration
-  optim_type = cfg$scenarios$problem_type
-  
-  # Building list relating type of LU to type of optimisation
-  lu_to_optim = lu_class_types
-  lu_to_optim[lu_to_optim == 'N'] = 'C'
-  lu_to_optim[lu_to_optim == 'A'] = 'R'
-  
-  # Builds raster of interest areas
-  interest_areas = Reduce('+', lu_ras[lu_to_optim %in% optim_type])
-  
-  # Building master_index of pixels of interest
-  master_index = which(values(interest_areas > 0))
+  if ((cfg$scenarios$problem_type != cfg_bk$scenarios$problem_type) | # problem type changed or
+      (update_flag$lu)){                                              # land-use files were updated
+    source('plangea_harmonize_master_index.R')
+    master_index = plangea_harmonize_master_index(cfg, lu_res)
+    update_flag$master = T
+  } else {
+    load(paste0(in_dir, 'master_index.Rdata'))
+    update_flag$master = F
+  }
   
   # Creating list with raster values corresponding to the master_index
-  lu_vals = lapply(lu_ras, function(x){x[master_index]})
+  lu_vals = lapply(lu_res$lu_ras, function(x){x[master_index]})
   
+  
+  # All-variables list -------------------------------------------------------
   # Loading ready variables
   var_ras_names = cfg$variables$variable_raster_names
   
-#<<<<<<< HEAD
   var_vals = lapply(paste0(var_dir, var_ras_names[cfg$variables$ready_variables]),
                     function(x){load_raster(x, master_index)})
   names(var_vals) = cfg$variables$variable_names[cfg$variables$ready_variables]
   
-  
-  # All-variables list -------------------------------------------------------
   # Build list of all variables
   allvar_list = as.list(cfg$variables$variable_names)
   names(allvar_list) = allvar_list
@@ -113,7 +124,14 @@ plangea_harmonize = function(cfg){
   
   # Including biodiversity benefits into allvar_list
   allvar_list[names(allvar_list) %in% cfg$variables$calc_bd$bd_variable_name] = list(bd)
+  
+  # Saving Rdatas
+  env_list = ls()
+  for (i in )
 
+  # Updating backup config data  
+  save(cfg, paste0(in_dir, 'cfg_bk.Rdata'))
+  
   return(allvar_list)
     
 #=======

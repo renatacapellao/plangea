@@ -16,13 +16,13 @@ plangea_wrapper = function(config_json_filename='plangea_config.json'){
   er_dir = paste0(rawdata_dir, cfg$io$lu_path, cfg$io$ecoregions_path)
   var_dir = paste0(rawdata_dir, cfg$io$variables_path)
   spp_dir = paste0(rawdata_dir, cfg$io$species_path)
-  in_dir = paste0(base_dir, cfg$io$preprocessed_path)
+  in_dir = paste0(base_dir, cfg$io$processed_path)
   out_dir = paste0(base_dir, cfg$io$output_path)
   
   
   # Harmonize data module ----------------------------------------------------
   source('plangea_harmonize.R')
-  allvar_list = plangea_harmonize(cfg)
+  allvar_list = plangea_harmonize(cfg, config_json_filename = config_json_filename)
   
   
   # Scenarios module ---------------------------------------------------------
