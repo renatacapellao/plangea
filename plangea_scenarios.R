@@ -1,4 +1,4 @@
-plangea_scenarios = function(cfg, allvar.list){
+plangea_scenarios = function(cfg, allvar_list){
   # List with scenario targets (overall)
   targets=as.numeric(cfg$scenarios$targets)
   names(targets) = cfg$scenarios$target_names
