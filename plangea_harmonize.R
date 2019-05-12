@@ -1,88 +1,86 @@
 
 plangea_harmonize = function(cfg, config_json_filename){
   
-  # Structures for controling changes ------------------------------------
+  # Initiating structures for controling changes -------------------------------
   
-  # Creating / Loading log file
+  # Creating / Loading harmonize_log: stores info on files loaded by the script
   if (file.exists(paste0(in_dir, 'harmonize_log.Rdata'))){
     load(paste0(in_dir, 'harmonize_log.Rdata'))
   } else {
-      harmonize_log = list(json = present_json_info)
+      present_json_info = cfg
+      harmonize_log = list(start = present_json_info)
       save(harmonize_log, file = (paste0(in_dir, 'harmonize_log.Rdata')))
     }
   
-  # Creating control-flags data.frame for updated input files
-  update_flag = data.frame(lu=F)
+  # Creating update_flag: stores info on which sub-modules actively computed their result
+  update_flag = data.frame(start=T)
   
   # Reading backup config file
-  if(file.exists(paste0(in_dir, 'cfg_bk.Rdata'))){
-    load(paste0(in_dir, 'cfg_bk.Rdata'))
-    } else {cfg_bk = cfg}
+  #if(file.exists(paste0(in_dir, 'cfg_bk.Rdata'))){
+  #  load(paste0(in_dir, 'cfg_bk.Rdata'))
+  #  } else {cfg_bk = rapply(cfg, function(x){''}, how = "replace")}
   
   
-  # Land-use / Terrestrial Index -----------------------------------------
-  present_lu_info = file.info(dir(lu_dir, full.names = T)[dir(lu_dir) %in% cfg$landscape_features$land_use$classes_raster_names], extra_cols = F)
+  # Sub-module: Land-use / Terrestrial Index -----------------------------------
+  source('plangea_harmonize_lu.R')
   
-  if(is.null(harmonize_log$lu)){harmonize_log$lu = present_lu_info}   # in case the script is running for the 1st time
+  lu_res = plangea_harmonize_lu(cfg, file_log=harmonize_log, flag_log=update_flag, force_comp=T)
   
-  if ((nrow(present_lu_info) != nrow(harmonize_log$lu)) |             # number of files is not the same or
-      (prod(present_lu_info$ctime != harmonize_log$lu$ctime)==1) |    # creation times are not the same or
-      (!file.exists(paste0(in_dir, 'harmonize_lu.Rdata')))            # resulting processed data file not found
-      ){
-    source('plangea_harmonize_lu.R')
-    lu_res = plangea_harmonize_lu(cfg)
-    harmonize_log$lu = lu_res$lu_log
-    update_flag$lu = T
-  } else {
-    load(paste0(in_dir, 'harmonize_lu.Rdata'))
-    update_flag$lu = F
-    }
+  lu_vals = lu_res$lu_vals
+  master_index = lu_res$master_index
+  terrestrial_index = lu_res$terrestrial_index
+  lu_class_types = lu_res$lu_class_types
+  harmonize_log = lu_res$harmonize_log
+  update_flag = lu_res$update_flag
   
-  
-  # Master Index ---------------------------------------------------------
-  if ((cfg$scenarios$problem_type != cfg_bk$scenarios$problem_type) | # problem type changed or
-      (update_flag$lu)){                                              # land-use files were updated
-    source('plangea_harmonize_master_index.R')
-    master_index = plangea_harmonize_master_index(cfg, lu_res)
-    update_flag$master = T
-  } else {
-    load(paste0(in_dir, 'master_index.Rdata'))
-    update_flag$master = F
-  }
-  
-  # Creating list with raster values corresponding to the master_index
-  lu_vals = lapply(lu_res$lu_ras, function(x){x[master_index]})
-  
-  
-  # All-variables list -------------------------------------------------------
-  # Loading ready variables
-  var_ras_names = cfg$variables$variable_raster_names
-  
-  var_vals = lapply(paste0(var_dir, var_ras_names[cfg$variables$ready_variables]),
-                    function(x){load_raster(x, master_index)})
-  names(var_vals) = cfg$variables$variable_names[cfg$variables$ready_variables]
-  
-  # Build list of all variables
-  allvar_list = as.list(cfg$variables$variable_names)
-  names(allvar_list) = allvar_list
-  
-  # Include in allvar list the variables already loaded
-  allvar_list[names(allvar_list) %in% names(var_vals)] = var_vals
-  
+
+  # Sub-module: include ready variables into allvar_list -----------------------
+  source('plangea_harmonize_add_ready.R')
+
+  ready_res = plangea_harmonize_add_ready(cfg, file_log = harmonize_log,
+                                         flag_log = update_flag, 
+                                         master_index = master_index, force_comp=T)
+
+  allvar_list = ready_res$allvar_list
+  harmonize_log = ready_res$harmonize_log
+  update_flag = ready_res$update_flag
+
+
+
   
   # Opportunity cost ---------------------------------------------------------
   # Computing opportunity costs, if: (a) oc is not labeled as ready in
-  # $ready_variables, and if (b) the required rasters are in the right folder
+  # $ready_variables, and if (b) the required rasters for computing the oc are
+  # in the right folder
+  update_flag$oc = F
+  harmonize_log$calc_oc = ''
   if (!cfg$variables$ready_variables[cfg$variables$variable_names %in%
                                      (cfg$variables$calc_oc$oc_variable_name)] & # condition (a)
       (length(which(dir(var_dir) %in% cfg$variables$calc_oc$oc_files)) ==
       length(cfg$variables$calc_oc$oc_names))){ # condition (b)
     
-    source('plangea_calc_oc.R')
-    
+    if (update_flag$lu){
+      source('plangea_calc_oc.R')
+      oc_ras_names = cfg$variables$calc_oc$oc_files
+      
+      cost_list = lapply(paste0(var_dir, oc_ras_names),
+                         function(x){load_raster(x, master_index)})
+      
+      names(cost_list) = cfg$variables$calc_oc$oc_names
+      
+      # Saving in harmonize_log information about rasters used to build cost_list
+      harmonize_log$calc_oc = file.info(dir(var_dir, full.names = T)[dir(var_dir) %in% oc_ras_names], extra_cols = F)
+      
+      # computing opportunity cost
+      oc = plangea_calc_oc(cfg, cost_list = cost_list, lu_val_list=lu_vals, master_index=master_index)
+      
+      update_flag$oc = T
+    } else {
+      load(paste0(in_dir, 'oc.Rdata'))
+    }
+
     # Including opportunity cost into allvar_list
-    allvar_list[names(allvar_list) %in% cfg$variables$calc_oc$oc_variable_name]=
-      list(plangea_calc_oc(cfg, lu_val_list=lu_vals, master_index=master_index))
+    allvar_list[names(allvar_list) %in% cfg$variables$calc_oc$oc_variable_name] = list(oc)
     
   } # end of calc_oc if statement
 
