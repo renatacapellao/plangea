@@ -13,7 +13,7 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
     # Modifies control structures to indicate master_index will be computed
     flag_log$master = T
     
-    # Prints info on why lu_res is being computed
+    # Prints info on why master_index is being computed
     if (verbose) {cat(paste0('Computing master_index results. Reason(s): \n',
                              ifelse(type_check, 'different type of problem \n', ''),
                              ifelse(rdata_check, 'land-use variables were changed \n', ''),

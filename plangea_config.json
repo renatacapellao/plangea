@@ -13,11 +13,11 @@
 
 	"variables": {
 		"variable_names": ["cb", "bd", "oc"],   
-		"ready_variables": [true, true, false],  
 		"variable_types": ["B", "B", "C"],  
 		"variable_weights": [1, [1, 10, 100, 1000], 1],
 		"variable_scaling_factor": [1e-3, 1e2, 1e-4],
-		"variable_raster_names": [
+		"ready_variables": [true, true, false],  
+		"ready_variables_raster_names": [
 		  "DELTA_C_BiomassSoil30cm_v12.1.tif",
 		  "opportunity_costs_cropland_4.9km_Molweide.tif",
 		  ""
@@ -71,6 +71,7 @@
 	      "ESA_landuse_300m_1992_shrubland_media_4.9km_Molweide.tif",
 	      "ESA_landuse_300m_1992_wetlands_media_4.9km_Molweide.tif"
 	    ],
+	    "include_ecoregions": true,
 	    "ecoregions_raster_names": [
 	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_desert.tif",
 	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_forest.tif",
