@@ -5,7 +5,7 @@ plangea_harmonize_add_ready = function(cfg, file_log, flag_log, master_index,
   flag_log$ready_var = F
   
   # Loading variables raster names
-  var_ras_names = cfg$variables$variable_raster_names
+  var_ras_names = cfg$variables$ready_variables_raster_names
   
   # Subsetting variable raster by ready variables
   var_ready_names = var_ras_names[cfg$variables$ready_variables]
