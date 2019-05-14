@@ -41,7 +41,10 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     names(p_lu_maps) = cfg$landscape_features$original_areas$past_class_names
     save(p_lu_maps, file = paste0(in_dir, 'past_lu.Rdata'))
   } else {
-    if (config_check){load(paste0(in_dir, 'past_lu.Rdata'))} else {
+    if (config_check){
+      if (verbose) {cat('Loading past-land-use data \n')}
+      load(paste0(in_dir, 'past_lu.Rdata'))}
+    else {
       p_lu_maps = c_lu_maps[lu_types == "N"]}
     }
   
@@ -89,41 +92,49 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     names(er_maps) = cfg$landscape_features$original_areas$past_class_names   
     save(er_maps, file = paste0(in_dir, 'er.Rdata'))
   } else {
-    if (config_check){load(file = paste0(in_dir, 'er.Rdata'))} else {
+    if (config_check){
+      if (verbose) {cat('Loading ecoregions data \n')}
+      load(file = paste0(in_dir, 'er.Rdata'))}
+    else {
       er_maps = lapply(c_lu_maps[lu_types == "N"],
                        function(x){Reduce('+', c_lu_maps[lu_types == "N"]) / length(which(lu_types == "N"))})
     }
   }
 
-
-  # Total current anthropic area in each pixel
-  c_anth_map = Reduce('+', c_lu_maps[lu_types == "A"])
+  # Original areas -------------------------------------------------------------
   
-  # Condition for applying ecoregion classes: no past natural or current anthropic above 95%
-  corr_cond = ( (Reduce('+', p_lu_maps)==0) | (c_anth_map>0.95) )
-  
-  # Proportion of past natural area in each pixel
-  p_nat_maps = lapply(p_lu_maps, function(x){x / Reduce('+', p_lu_maps)})
-
-  # Correcting proportions of past natural areas in pixels where corr_cond is verified
-  for (i in 1:length(p_nat_maps)){p_nat_maps[[i]][corr_cond] = er_maps[[i]][corr_cond]}
+  if ((flag_log$oa == T) | (!file.exists(paste0(in_dir, 'oa.Rdata'))) ){
+    # Total current anthropic area in each pixel
+    c_anth_map = Reduce('+', c_lu_maps[lu_types == "A"])
     
-  # Proportion of current anthropic area converted on each natural type
-  c_conv_map = lapply(p_nat_maps, function(x){x * c_anth_map})
-  
-  # Computing original areas
-  oa_maps = mapply('+', c_lu_maps[lu_types == "N"], c_conv_map, SIMPLIFY=F)
+    # Condition for applying ecoregion classes: no past natural or current anthropic above 95%
+    corr_cond = ( (Reduce('+', p_lu_maps)==0) | (c_anth_map>0.95) )
+    
+    # Proportion of past natural area in each pixel
+    p_nat_maps = lapply(p_lu_maps, function(x){x / Reduce('+', p_lu_maps)})
+    
+    # Correcting proportions of past natural areas in pixels where corr_cond is verified
+    for (i in 1:length(p_nat_maps)){p_nat_maps[[i]][corr_cond] = er_maps[[i]][corr_cond]}
+    
+    # Proportion of current anthropic area converted on each natural type
+    c_conv_map = lapply(p_nat_maps, function(x){x * c_anth_map})
+    
+    # Computing original areas
+    oa_maps = mapply('+', c_lu_maps[lu_types == "N"], c_conv_map, SIMPLIFY=F)
+    
+    # Checking that original areas sum to 1 within given tolerance  
+    check_oa = Reduce('+', c(oa_maps, list(Reduce('+', c_lu_maps[lu_types=='I']))))
+    n_problems = length(which((check_oa -1) > tolerance))
+    if(n_problems > 0){warning(paste0('OA was computed with ', n_problems,' inconsistencies'))}
+    
+    # Checking that original areas have no NA
+    na_problem = lapply(oa_maps, function(x){length(which(is.na(x)))} != 0)
+    
+    save(oa_maps, file = paste0(in_dir, 'oa.Rdata'))
+  } else {
+    if (verbose) {cat('Loading original area data \n')}
+    load (paste0(in_dir, 'oa.Rdata'))}
 
-  # Checking that original areas sum to 1 within given tolerance  
-  check_oa = Reduce('+', c(oa_maps, list(Reduce('+', c_lu_maps[lu_types=='I']))))
-  n_problems = length(which((check_oa -1) > tolerance))
-  if(n_problems > 0){warning(paste0('OA was computed with ', n_problems,' inconsistencies'))}
-  
-  # Checking that original areas have no NA
-  na_problem = lapply(oa_maps, function(x){length(which(is.na(x)))} != 0)
-  
-  #if (na_problem){print('a')}
-  
   oa_res = list(oa_vals = oa_maps, er_vals = er_maps, p_lu_vals = p_lu_maps,
                 harmonize_log = file_log, update_flag = flag_log)
   

@@ -1,5 +1,5 @@
 
-plangea_harmonize = function(cfg, config_json_filename){
+plangea_harmonize = function(cfg, config_json_filename, verbose=F){
   
   # Initiating structures for controling changes -------------------------------
   
@@ -24,7 +24,8 @@ plangea_harmonize = function(cfg, config_json_filename){
   # Sub-module: Land-use / Terrestrial Index -----------------------------------
   source('plangea_harmonize_lu.R')
   
-  lu_res = plangea_harmonize_lu(cfg, file_log=harmonize_log, flag_log=update_flag)
+  lu_res = plangea_harmonize_lu(cfg, file_log=harmonize_log, flag_log=update_flag,
+                                verbose = verbose)
   
   lu_vals = lu_res$lu_vals
   master_index = lu_res$master_index
@@ -32,6 +33,7 @@ plangea_harmonize = function(cfg, config_json_filename){
   lu_class_types = lu_res$lu_class_types
   harmonize_log = lu_res$harmonize_log
   update_flag = lu_res$update_flag
+  rm(lu_res)
   
 
   # Sub-module: include ready variables into allvar_list -----------------------
@@ -39,66 +41,70 @@ plangea_harmonize = function(cfg, config_json_filename){
 
   ready_res = plangea_harmonize_add_ready(cfg, file_log = harmonize_log,
                                          flag_log = update_flag, 
-                                         master_index = master_index)
+                                         master_index = master_index,
+                                         verbose = verbose)
 
   allvar_list = ready_res$allvar_list
   harmonize_log = ready_res$harmonize_log
   update_flag = ready_res$update_flag
+  rm(ready_res)
 
 
 
   
-  # Opportunity cost ---------------------------------------------------------
+  # Sub-module: opportunity cost -----------------------------------------------
   source('plangea_harmonize_oc.R')
     
   oc_res = plangea_harmonize_oc(cfg, file_log = harmonize_log,
                                 flag_log = update_flag,
                                 master_index = master_index,
-                                lu_val_list = lu_vals)
+                                lu_val_list = lu_vals,
+                                verbose = verbose)
   
   oc = oc_res$oc
   harmonize_log = oc_res$harmonize_log
   update_flag = oc_res$update_flag
+  rm(oc_res)
 
   allvar_list[names(allvar_list) %in% cfg$variables$calc_oc$oc_variable_name] = list(oc)
     
 
-  # Original areas (OA) ---------------------------------------------------------
+  # Sub-module: original areas (OA) --------------------------------------------
   source('plangea_harmonize_oa.R')
     
   oa_res = plangea_harmonize_oa(cfg, file_log = harmonize_log,
                                 flag_log = update_flag, c_lu_maps = lu_vals,
                                 lu_types = lu_class_types, tolerance=1.e-7,
-                                force_comp = T)
+                                verbose = verbose)
   
-  oa = oa_res$oa_vals
+  oa_vals = oa_res$oa_vals
   harmonize_log = oa_res$harmonize_log
   update_flag = oa_res$update_flag
+  rm(oa_res)
     
 
-  # Biodiversity ---------------------------------------------------------
+  # Sub-module: biodiversity ---------------------------------------------------
+  source('plangea_harmonize_bd.R')
   
-  source('plangea_calc_bd.R')
-  
-  bd = plangea_calc_bd(cfg = cfg, lu_vals = lu_vals,
-                       master_index = master_index, oa_vals = oa_vals)
-  
-  # Including biodiversity benefits into allvar_list
+  bd_res = plangea_harmonize_bd(cfg, file_log = harmonize_log,
+                                flag_log = update_flag, lu_vals = lu_vals,
+                                master_index = master_index, oa_vals = oa_vals,
+                                verbose = verbose)
+
+  bd = bd_res$bd
+  usphab_index = bd_res$usphab_index 
+  species_index_list_proc = bd_res$species_index_list_proc
+  hab_now_areas = bd_res$hab_now_areas
+  hab_pot_areas = bd_res$hab_pot_areas
+  harmonize_log = bd_res$harmonize_log
+  update_flag = bd_res$update_flag
+  rm(bd_res)
+
   allvar_list[names(allvar_list) %in% cfg$variables$calc_bd$bd_variable_name] = list(bd)
   
-  # Saving Rdatas
-  env_list = ls()
-  for (i in )
-
-  # Updating backup config data  
-  save(cfg, paste0(in_dir, 'cfg_bk.Rdata'))
   
-  return(allvar_list)
-    
-#=======
-  # List _Rdata files saved in dir
-  #obj_list = dir(dir, full_names=T, pattern='_Rdata', ignore_case=T)
-  # Loads all objects with names in obj_list
-#>>>>>>> 82f05d12db99c7fed4f34e3018ec5959b097fe1f
-  
-} # end of plangea_harmonize function
+  # Saving Rdatas and returning ------------------------------------------------
+  harmonize_res = mget(objects())
+  save(harmonize_res, file='harmonize_full_envir.RData')
+  return(harmonize_res)
+}

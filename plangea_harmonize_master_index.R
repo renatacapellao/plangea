@@ -41,6 +41,7 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
     
     save(master_index, file = paste0(in_dir, 'master_index.Rdata'))  
   } else {
+    if (verbose) {cat('Loading master index data \n')}
     load(paste0(in_dir, 'master_index.Rdata'))
 }
   return(list(master_index, file_log, flag_log))

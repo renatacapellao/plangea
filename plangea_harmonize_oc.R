@@ -46,6 +46,7 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
     
     save(oc, file = paste0(in_dir, 'oc.Rdata'))
   } else {
+    if (verbose) {cat('Loading opportunity-cost data \n')}
     load(paste0(in_dir, 'oc.Rdata'))
   }
   

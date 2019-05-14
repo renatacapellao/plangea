@@ -22,7 +22,7 @@ plangea_wrapper = function(config_json_filename='plangea_config.json'){
   
   # Harmonize data module ----------------------------------------------------
   source('plangea_harmonize.R')
-  allvar_list = plangea_harmonize(cfg, config_json_filename = config_json_filename)
+  in_data = plangea_harmonize(cfg, config_json_filename = config_json_filename, verbose=T)
   
   
   # Scenarios module ---------------------------------------------------------
