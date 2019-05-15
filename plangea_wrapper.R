@@ -16,6 +16,7 @@ plangea_wrapper = function(config_json_filename='plangea_config.json'){
   er_dir = paste0(rawdata_dir, cfg$io$lu_path, cfg$io$ecoregions_path)    # input ecoregions / original LC maps
   var_dir = paste0(rawdata_dir, cfg$io$variables_path)                    # input variables maps
   spp_dir = paste0(rawdata_dir, cfg$io$species_path)                      # input species maps
+  sr_dir = paste0(rawdata_dir,cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`) # sub-regions data
   in_dir = paste0(base_dir, cfg$io$processed_path)                        # preprocessed Rdata
   out_dir = paste0(base_dir, cfg$io$output_path)                          # output directory
   
@@ -27,7 +28,7 @@ plangea_wrapper = function(config_json_filename='plangea_config.json'){
   
   # Scenarios module ---------------------------------------------------------
   source('plangea_scenarios.R')
-  scen_list = plangea_scenarios(cfg, allvar_list)
+  scen_list = plangea_scenarios(cfg, in_data)
   
   
   # Run-optimization module --------------------------------------------------

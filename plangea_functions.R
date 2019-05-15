@@ -40,6 +40,18 @@ gen_usphab = function(n){
   res = res[rowSums(res == rep(0,n))!=5,] # removing solution with all zeroes
 }
 
+plot_vals = function(x_vals, base_ras, master_index){
+  base_ras[!is.na(base_ras)] = 0
+  base_ras[master_index] = x_vals
+  plot(base_ras)
+}
+
+spplot_vals = function(x_vals, base_ras, master_index){
+  base_ras[!is.na(base_ras)] = 0
+  base_ras[master_index] = x_vals
+  spplot(base_ras)
+}
+
 # Legacy calc_bd ------------------------------------------------------------
 calc_bd <- function(slp, np, prop_restore, usphab_proc, usphab_index,
                     species_index_list_proc, g_scalar_bd){

@@ -28,11 +28,12 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log,
                         unlist(lapply(file_log$bd, function(x){x$ctime}), nrow,use.names = F)) > 0) 
   # resulting processed data file not found
   rdata_check = (!file.exists(paste0(in_dir, 'harmonize_bd.Rdata')))
+  dependencies = flag_log$master
   
   # Adding / updating 'bd' data to file_log (must be done *after* checks)
   file_log$bd = present_bd_info  
   
-  if (nfiles_check | ctimes_check | rdata_check | force_comp){
+  if (nfiles_check | ctimes_check | rdata_check | dependencies | force_comp){
     # Modifies control structures to indicate lu_res will be computed
     flag_log$bd = T
     
@@ -41,6 +42,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log,
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
                              ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
     

@@ -17,12 +17,13 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
   nfiles_check = (nrow(current_past_lu_info) != nrow(file_log$past_lu))         # number of files is not the same
   ctimes_check = (prod(current_past_lu_info$ctime > file_log$past_lu$ctime)==1) # creation times are not the same
   rdata_check = (!file.exists(paste0(in_dir, 'past_lu.Rdata')))                 # resulting processed data file not found
+  dependencies = flag_log$master
   config_check = cfg$landscape_features$original_areas$include_past             # Json asks to include past LU
   
   # Adding / updating 'past lu' data to file_log (must be done *after* checks)
   file_log$past_lu = current_past_lu_info  
   
-  if ((nfiles_check | ctimes_check | rdata_check | force_comp) & (config_check)){
+  if ((nfiles_check | ctimes_check | rdata_check | dependencies | force_comp) & (config_check)){
     # Modifies control structures to indicate lu_res will be computed
     flag_log$oa = T
     
@@ -31,6 +32,7 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
                              ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
   

@@ -19,10 +19,11 @@ plangea_harmonize_add_ready = function(cfg, file_log, flag_log, master_index,
   nfiles_check = (nrow(present_var_info) != nrow(file_log$ready_var))      # number of files is not the same
   ctimes_check = (prod(present_var_info$ctime > file_log$ready_var$ctime)==1)    # creation times not the same
   rdata_check = (!file.exists(paste0(in_dir, 'var_vals.Rdata')))  # resulting processed data file not found
+  dependencies = flag_log$master
 
   file_log$ready_var = file.info(dir(var_dir, full.names = T)[dir(var_dir) %in% var_ready_names], extra_cols = F)
   
-  if (nfiles_check | ctimes_check | rdata_check | force_comp){
+  if (nfiles_check | ctimes_check | rdata_check | dependencies | force_comp){
     # Modifies control structures to indicate ready variables will be computed
     flag_log$ready_var = T
     
@@ -31,6 +32,7 @@ plangea_harmonize_add_ready = function(cfg, file_log, flag_log, master_index,
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
                              ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
     

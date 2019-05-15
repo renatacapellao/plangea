@@ -1,4 +1,4 @@
-plangea_scenarios = function(cfg, allvar_list){
+plangea_scenarios = function(cfg, in_data){
   # List with scenario targets (overall)
   targets=as.numeric(cfg$scenarios$targets)
   names(targets) = cfg$scenarios$target_names
@@ -6,19 +6,11 @@ plangea_scenarios = function(cfg, allvar_list){
   
   # Prepare data structures for sub-region analyses if relevant
   if (cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios){
-    # Raster with sub-regions
-    sr_ras = raster(paste0(cfg$io$preprocessed_data_location_name,
-                           cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`,
-                           cfg$scenarios$`sub-region_scenarios`$`sub-region_raster_name`))
-    
-    # Table with sub-region labels for classes in sr_ras
-    sr_tbl = read.csv(paste0(cfg$io$preprocessed_data_location_name,
-                             cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`,
-                             cfg$scenarios$`sub-region_scenarios`$`sub-region_names_table`))
+
     
     # Sub-region-targets data.frame
     if (!cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`){
-      sr_targets = calc_sparable_area(read.csv(paste0(cfg$io$preprocessed_data_location_name,
+      sr_targets = calc_sparable_area(read.csv(paste0(cfg$io$rawdata_path,
                                                       cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`,
                                                       cfg$scenarios$`sub-region_scenarios`$`sub-region_targets`)))
     }
@@ -40,13 +32,13 @@ plangea_scenarios = function(cfg, allvar_list){
   # vector format (wrt to a master_index), and named according to
   # $variables_names -- and computes the objective function
 
-  # for (i in 1:length(cfg$scenarios$benchmark_scenarios)){
-  #   iter_varnames = cfg$scenarios$benchmark_scenarios[[i]]
-  #   iter_ptr = names(allvar_list) %in% iter_varnames
-  #   var_list = allvar_list[iter_ptr]
-  #   type_list = cfg$variables$variable_types[iter_ptr]
-  #   iter_obj = calc_objective_function(var_list,type_list)
-  # }
+   for (i in 1:length(cfg$scenarios$benchmark_scenarios)){
+     iter_varnames = cfg$scenarios$benchmark_scenarios[[i]]
+     iter_ptr = names(in_data$allvar_list) %in% iter_varnames
+     var_list = in_data$allvar_list[iter_ptr]
+     type_list = cfg$variables$variable_types[iter_ptr]
+     iter_obj = calc_objective_function(var_list,type_list)
+   }
 
   sum_anthropic = 30000000
   targets[[which(sapply(targets, is.na))]] = sum_anthropic

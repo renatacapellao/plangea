@@ -103,6 +103,22 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F){
   allvar_list[names(allvar_list) %in% cfg$variables$calc_bd$bd_variable_name] = list(bd)
   
   
+  # Sub-module: sub-regions ----------------------------------------------------
+  source('plangea_harmonize_subregions.R')
+  
+  sr_res = plangea_harmonize_subregions(cfg, file_log = harmonize_log,
+                                        flag_log = update_flag,
+                                        master_index = master_index,
+                                        verbose = verbose)
+  
+  sr_vals = sr_res$sr_vals
+  sr_tbl = sr_res$sr_tbl
+  sr_coefs = sr_res$sr_coefs
+  harmonize_log = sr_res$harmonize_log
+  update_flag = sr_res$update_flag
+  rm(sr_res)
+  
+  
   # Saving Rdatas and returning ------------------------------------------------
   harmonize_res = mget(objects())
   save(harmonize_res, file='harmonize_full_envir.RData')

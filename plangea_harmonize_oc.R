@@ -15,13 +15,14 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
   rdata_check = (!file.exists(paste0(in_dir, 'harmonize_oc.Rdata')))  # resulting processed data file not found
   ready_check = !cfg$variables$ready_variables[cfg$variables$variable_names %in% # oc is not labeled as ready
                                                  (cfg$variables$calc_oc$oc_variable_name)]
+  dependencies = flag_log$master
   names_check = (length(which(dir(var_dir) %in% cfg$variables$calc_oc$oc_files)) ==
                    length(cfg$variables$calc_oc$oc_names))            # all rasters have names, and vice versa
   
   # Adding / updating 'lu' data to file_log (must be done *after* checks)
   file_log$oc = present_oc_info  
   
-  if ((nfiles_check | ctimes_check | rdata_check) & (ready_check | names_check)){
+  if ((nfiles_check | ctimes_check | rdata_check | dependencies | force_comp) & (ready_check | names_check)){
     # Modifies control structures to indicate oc will be computed
     flag_log$oc = T
     
@@ -30,6 +31,7 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
                              ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
     

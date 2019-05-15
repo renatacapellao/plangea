@@ -91,7 +91,7 @@
 		"targets": ["1.5e6", "3.5e6", "13.3719e6", "12.7e6", "25.4e6", "8466e6"],
 		"sub-region_scenarios": {
 			"include_subregion_scenarios": true,
-			"sub-region_folder": "",
+			"sub-region_folder": "subregions/",
 			"sub-region_raster_name": "countries-code.tif",
 			"sub-region_names_table": "countries-code.csv",
 			"sub-region_flat_targets": false,
