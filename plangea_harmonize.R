@@ -30,6 +30,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F){
   lu_vals = lu_res$lu_vals
   master_index = lu_res$master_index
   terrestrial_index = lu_res$terrestrial_index
+  overall_area = lu_res$overall_area
   lu_class_types = lu_res$lu_class_types
   harmonize_log = lu_res$harmonize_log
   update_flag = lu_res$update_flag
@@ -73,6 +74,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F){
   source('plangea_harmonize_oa.R')
     
   oa_res = plangea_harmonize_oa(cfg, file_log = harmonize_log,
+                                master_index = master_index,
                                 flag_log = update_flag, c_lu_maps = lu_vals,
                                 lu_types = lu_class_types, tolerance=1.e-7,
                                 verbose = verbose)

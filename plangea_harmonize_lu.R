@@ -51,7 +51,7 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     
     # Create auxiliary results list
     lu_aux = list(terrestrial_index = terrestrial_index,
-                  lu_class_types = lu_class_types)
+                  lu_class_types = lu_class_types, px_area = px_area)
     
     save(lu_ras, file = paste0(in_dir, 'lu_ras.Rdata'))
     save(lu_aux, file = paste0(in_dir, 'lu_aux.Rdata'))
@@ -59,12 +59,17 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     # Updating / loading master_index
     source('plangea_harmonize_master_index.R')
     
-    master_index = plangea_harmonize_master_index(cfg, file_log, flag_log,
-                                                  lu_ras, lu_aux, force_comp)
+    mi_res = plangea_harmonize_master_index(cfg=cfg, file_log=file_log,
+                                            flag_log=flag_log, lu_ras=lu_ras,
+                                            lu_aux=lu_aux, verbose=verbose,
+                                            force_comp=force_comp)
     
-    file_log = master_index[[2]]
-    lag_log = master_index[[3]]
-    master_index = master_index[[1]]
+    master_index = mi_res$master_index
+    overall_area = mi_res$overall_area
+    px_area = mi_res$px_area
+    file_log = mi_res$file_log
+    flag_log = mi_res$flag_log
+    rm(mi_res)
     
     # Computing lu_vals list (percent of the pixel in the master_index covered by each LU)
     lu_vals = lapply(lu_ras, function(x){x[master_index]})
@@ -75,23 +80,25 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     load(paste0(in_dir, 'lu_aux.Rdata'))
     terrestrial_index = lu_aux$terrestrial_index
     lu_class_types = lu_aux$lu_class_types
+    # Loads land-use rasters (even if they didn't change, the master_index did)
+    if (verbose) {cat('Loading land-use-raster data \n')}
+    load(paste0(in_dir, 'lu_ras.Rdata'))
     
     source('plangea_harmonize_master_index.R')
     
-    master_index = plangea_harmonize_master_index(cfg, file_log, flag_log,
-                                                  lu_ras, lu_aux,
-                                                  verbose=verbose,
-                                                  force_comp=force_comp)
+    mi_res = plangea_harmonize_master_index(cfg=cfg, file_log=file_log,
+                                            flag_log=flag_log, lu_ras=lu_ras,
+                                            lu_aux=lu_aux, verbose=verbose,
+                                            force_comp=force_comp)
     
-    file_log = master_index[[2]]
-    flag_log = master_index[[3]]
-    master_index = master_index[[1]]
+    master_index = mi_res$master_index
+    overall_area = mi_res$overall_area
+    px_area = mi_res$px_area
+    file_log = mi_res$file_log
+    flag_log = mi_res$flag_log
+    rm(mi_res)
     
     if (flag_log$master == T | (!file.exists(paste0(in_dir, 'lu_vals.Rdata'))) ){
-      # Loads land-use rasters (even if they didn't change, the master_index did)
-      if (verbose) {cat('Loading land-use-raster data \n')}
-      load(paste0(in_dir, 'lu_ras.Rdata'))
-      
       # Updates lu_vals list (percent of the pixel in the master_index covered by each LU)
       lu_vals = lapply(lu_ras, function(x){x[master_index]})
       save(lu_vals, file = paste0(in_dir, 'lu_vals.Rdata'))
@@ -104,6 +111,7 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
   lu_res = list(master_index=master_index, lu_vals=lu_vals,
                 terrestrial_index = terrestrial_index,
                 lu_class_types = lu_class_types,
+                overall_area = overall_area, px_area = px_area,
                 harmonize_log = file_log, update_flag = flag_log)
   
   save(lu_res, file = paste0(in_dir, 'harmonize_lu.Rdata'))

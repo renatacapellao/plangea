@@ -3,25 +3,29 @@ plangea_scenarios = function(cfg, in_data){
   targets=as.numeric(cfg$scenarios$targets)
   names(targets) = cfg$scenarios$target_names
   targets = as.list(targets)
-  
-  # Prepare data structures for sub-region analyses if relevant
-  if (cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios){
 
+  # Filling empty targets with total area of interest
+  targets[[which(sapply(targets, is.na))]] = in_data$overall_area
     
-    # Sub-region-targets data.frame
-    if (!cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`){
-      sr_targets = calc_sparable_area(read.csv(paste0(cfg$io$rawdata_path,
-                                                      cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`,
-                                                      cfg$scenarios$`sub-region_scenarios`$`sub-region_targets`)))
-    }
+  # Limits to overall targets for trade-off curves
+  tradeoff_lims = cfg$scenarios$tradeoff_curve_percent_step_size *
+    cfg$scenarios$tradeoff_curve_percent_nstep_range[1]:cfg$scenarios$tradeoff_curve_percent_nstep_range[2]
+  
+  # Sub-region-targets data.frame
+  if (!cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`){
+    sr_targets = calc_sparable_area(read.csv(paste0(cfg$io$rawdata_path,
+                                                    cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`,
+                                                    cfg$scenarios$`sub-region_scenarios`$`sub-region_targets`)))
   }
+  
+  
   
   # List of names for Benchmark scenarios
   bm_list = lapply(cfg$scenarios$benchmark_scenarios,
                    function(x){paste0('scen-',paste0(x, collapse="-"))})
   
   # List of names for upper-bounds-limits scenarios
-  ub_list = lapply(cfg$scenarios$upper_bounds_limits,
+  ublim_list = lapply(cfg$scenarios$upper_bounds_limits,
                    function(x){paste0('ublim-',x)})
   
   # List of number of steps in each benchmark scenario
@@ -38,9 +42,9 @@ plangea_scenarios = function(cfg, in_data){
      var_list = in_data$allvar_list[iter_ptr]
      type_list = cfg$variables$variable_types[iter_ptr]
      iter_obj = calc_objective_function(var_list,type_list)
+     
+     # iter_res = plangea_scenarios_solver(cfg, iter_obj, ...)
    }
 
-  sum_anthropic = 30000000
-  targets[[which(sapply(targets, is.na))]] = sum_anthropic
-  
+
 } # end of plangea_scenarios function

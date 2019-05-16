@@ -9,7 +9,7 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
   lu_check = flag_log$lu                                                     # land-use files were updated
   rdata_check = (!file.exists(paste0(in_dir, 'master_index.Rdata')))         # resulting data file not found
   
-  if (type_check | lu_check | rdata_check){
+  if (type_check | lu_check | rdata_check | force_comp){
     # Modifies control structures to indicate master_index will be computed
     flag_log$master = T
     
@@ -39,10 +39,22 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
     # Building master_index of pixels of interest
     master_index = which(values(interest_areas > 0))
     
+    # Computing overall area of interest
+    overall_area = sum(interest_areas[master_index])
+    
+    # Computing pixel area
+    px_area = area(lu_ras[[1]])[master_index]
+    
+    mi_aux = list(overall_area = overall_area, px_area = px_area)
+    
     save(master_index, file = paste0(in_dir, 'master_index.Rdata'))  
+    save(mi_aux, file = paste0(in_dir, 'mi_aux.Rdata'))
   } else {
     if (verbose) {cat('Loading master index data \n')}
-    load(paste0(in_dir, 'master_index.Rdata'))
+    load(paste0(in_dir, 'mi_aux.Rdata'))
+    overall_area = mi_aux$overall_area
+    px_area = mi_aux$px_area
 }
-  return(list(master_index, file_log, flag_log))
+  return(list(master_index = master_index, overall_area = overall_area,
+              px_area = px_area, file_log = file_log, flag_log = flag_log))
 }

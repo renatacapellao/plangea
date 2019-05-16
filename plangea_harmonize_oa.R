@@ -1,4 +1,5 @@
 plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
+                                 master_index = master_index,
                                  tolerance=1.e-7, verbose=T, force_comp=F){
   # c_lu_maps: current land-use list of rasters or indexed vectors
   # lu_types: for each lu in the maps above, a single letter:
