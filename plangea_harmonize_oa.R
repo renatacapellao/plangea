@@ -1,4 +1,5 @@
 plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
+                                 master_index = master_index,
                                  tolerance=1.e-7, verbose=T, force_comp=F){
   # c_lu_maps: current land-use list of rasters or indexed vectors
   # lu_types: for each lu in the maps above, a single letter:
@@ -16,13 +17,14 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
   # Update checks
   nfiles_check = (nrow(current_past_lu_info) != nrow(file_log$past_lu))         # number of files is not the same
   ctimes_check = (prod(current_past_lu_info$ctime > file_log$past_lu$ctime)==1) # creation times are not the same
-  rdata_check = (!file.exists(paste0(in_dir, 'past_lu.Rdata')))                 # resulting processed data file not found
+  rds_check = (!file.exists(paste0(in_dir, 'past_lu')))                 # resulting processed data file not found
+  dependencies = flag_log$master
   config_check = cfg$landscape_features$original_areas$include_past             # Json asks to include past LU
   
   # Adding / updating 'past lu' data to file_log (must be done *after* checks)
   file_log$past_lu = current_past_lu_info  
   
-  if ((nfiles_check | ctimes_check | rdata_check | force_comp) & (config_check)){
+  if ((nfiles_check | ctimes_check | rds_check | dependencies | force_comp) & (config_check)){
     # Modifies control structures to indicate lu_res will be computed
     flag_log$oa = T
     
@@ -30,7 +32,8 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     if (verbose) {cat(paste0('Computing past land-use results. Reason(s): \n',
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
-                             ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(rds_check, 'absent rds file \n', ''),
+                             ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
   
@@ -39,9 +42,12 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     past_names = cfg$landscape_features$original_areas$past_raster_names
     p_lu_maps = lapply(paste0(past_lu_dir, past_names), function(x){load_raster(x, master_index)})
     names(p_lu_maps) = cfg$landscape_features$original_areas$past_class_names
-    save(p_lu_maps, file = paste0(in_dir, 'past_lu.Rdata'))
+    pigz_save(p_lu_maps, file = paste0(in_dir, 'past_lu'))
   } else {
-    if (config_check){load(paste0(in_dir, 'past_lu.Rdata'))} else {
+    if (config_check){
+      if (verbose) {cat('Loading past-land-use data \n')}
+      p_lu_maps = pigz_load(paste0(in_dir, 'past_lu'))}
+    else {
       p_lu_maps = c_lu_maps[lu_types == "N"]}
     }
   
@@ -58,13 +64,14 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
   # Update checks
   nfiles_check = (nrow(current_er_info) != nrow(file_log$er))         # number of files is not the same
   ctimes_check = (prod(current_er_info$ctime > file_log$er$ctime)==1) # creation times are not the same
-  rdata_check = (!file.exists(paste0(in_dir, 'er.Rdata')))            # resulting processed data file not found
+  rds_check = (!file.exists(paste0(in_dir, 'er')))            # resulting processed data file not found
+  dependencies = flag_log$master
   config_check = cfg$landscape_features$original_areas$include_ecoregions       # Json asks to include ER
   
   # Adding / updating 'ER' data to file_log (must be done *after* checks)
   file_log$er = current_er_info  
   
-  if ((nfiles_check | ctimes_check | rdata_check | force_comp) & (config_check)){
+  if ((nfiles_check | ctimes_check | rds_check | dependencies | force_comp) & (config_check)){
     # Modifies control structures to indicate lu_res will be computed
     flag_log$oa = T
     
@@ -72,7 +79,8 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     if (verbose) {cat(paste0('Computing ecoregions results. Reason(s): \n',
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
-                             ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(rds_check, 'absent rds file \n', ''),
+                             ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
     
@@ -87,46 +95,54 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     # Ecoregion maps required to deal with areas without natural-area remnants
     er_maps = lapply(paste0(er_dir, er_ras_names), function(x){load_raster(x, master_index)})
     names(er_maps) = cfg$landscape_features$original_areas$past_class_names   
-    save(er_maps, file = paste0(in_dir, 'er.Rdata'))
+    pigz_save(er_maps, file = paste0(in_dir, 'er'))
   } else {
-    if (config_check){load(file = paste0(in_dir, 'er.Rdata'))} else {
+    if (config_check){
+      if (verbose) {cat('Loading ecoregions data \n')}
+      er_maps = pigz_load(file = paste0(in_dir, 'er'))}
+    else {
       er_maps = lapply(c_lu_maps[lu_types == "N"],
                        function(x){Reduce('+', c_lu_maps[lu_types == "N"]) / length(which(lu_types == "N"))})
     }
   }
 
-
-  # Total current anthropic area in each pixel
-  c_anth_map = Reduce('+', c_lu_maps[lu_types == "A"])
+  # Original areas -------------------------------------------------------------
   
-  # Condition for applying ecoregion classes: no past natural or current anthropic above 95%
-  corr_cond = ( (Reduce('+', p_lu_maps)==0) | (c_anth_map>0.95) )
-  
-  # Proportion of past natural area in each pixel
-  p_nat_maps = lapply(p_lu_maps, function(x){x / Reduce('+', p_lu_maps)})
-
-  # Correcting proportions of past natural areas in pixels where corr_cond is verified
-  for (i in 1:length(p_nat_maps)){p_nat_maps[[i]][corr_cond] = er_maps[[i]][corr_cond]}
+  if ((flag_log$oa == T) | (!file.exists(paste0(in_dir, 'oa'))) ){
+    # Total current anthropic area in each pixel
+    c_anth_map = Reduce('+', c_lu_maps[lu_types == "A"])
     
-  # Proportion of current anthropic area converted on each natural type
-  c_conv_map = lapply(p_nat_maps, function(x){x * c_anth_map})
-  
-  # Computing original areas
-  oa_maps = mapply('+', c_lu_maps[lu_types == "N"], c_conv_map, SIMPLIFY=F)
+    # Condition for applying ecoregion classes: no past natural or current anthropic above 95%
+    corr_cond = ( (Reduce('+', p_lu_maps)==0) | (c_anth_map>0.95) )
+    
+    # Proportion of past natural area in each pixel
+    p_nat_maps = lapply(p_lu_maps, function(x){x / Reduce('+', p_lu_maps)})
+    
+    # Correcting proportions of past natural areas in pixels where corr_cond is verified
+    for (i in 1:length(p_nat_maps)){p_nat_maps[[i]][corr_cond] = er_maps[[i]][corr_cond]}
+    
+    # Proportion of current anthropic area converted on each natural type
+    c_conv_map = lapply(p_nat_maps, function(x){x * c_anth_map})
+    
+    # Computing original areas
+    oa_maps = mapply('+', c_lu_maps[lu_types == "N"], c_conv_map, SIMPLIFY=F)
+    
+    # Checking that original areas sum to 1 within given tolerance  
+    check_oa = Reduce('+', c(oa_maps, list(Reduce('+', c_lu_maps[lu_types=='I']))))
+    n_problems = length(which((check_oa -1) > tolerance))
+    if(n_problems > 0){warning(paste0('OA was computed with ', n_problems,' inconsistencies'))}
+    
+    # Checking that original areas have no NA
+    na_problem = lapply(oa_maps, function(x){length(which(is.na(x)))} != 0)
+    
+    pigz_save(oa_maps, file = paste0(in_dir, 'oa'))
+  } else {
+    if (verbose) {cat('Loading original area data \n')}
+    oa_maps = pigz_load (paste0(in_dir, 'oa'))}
 
-  # Checking that original areas sum to 1 within given tolerance  
-  check_oa = Reduce('+', c(oa_maps, list(Reduce('+', c_lu_maps[lu_types=='I']))))
-  n_problems = length(which((check_oa -1) > tolerance))
-  if(n_problems > 0){warning(paste0('OA was computed with ', n_problems,' inconsistencies'))}
-  
-  # Checking that original areas have no NA
-  na_problem = lapply(oa_maps, function(x){length(which(is.na(x)))} != 0)
-  
-  #if (na_problem){print('a')}
-  
   oa_res = list(oa_vals = oa_maps, er_vals = er_maps, p_lu_vals = p_lu_maps,
                 harmonize_log = file_log, update_flag = flag_log)
   
-  save(oa_res, file = paste0(in_dir, 'harmonize_oa.Rdata'))
+  pigz_save(oa_res, file = paste0(in_dir, 'harmonize_oa'))
   return(oa_res)
 }

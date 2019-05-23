@@ -86,12 +86,14 @@
 	"scenarios": {
 		"problem_type": "R", 
 		"benchmark_scenarios": ["cb", "bd", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
-		"nsteps_per_benchmark": [1, 10, 1, 10, 1, 10, 10],
+		"refresh_nsteps_per_benchmark": [1, 10, 1, 10, 1, 10, 10],
 		"target_names": ["BONN", "NYDC", "CTRY", "CBD", "CBD2", "WRLD"],
-		"targets": ["1.5e6", "3.5e6", "13.3719e6", "12.7e6", "25.4e6", "8466e6"],
+		"targets": ["1.5e6", "3.5e6", "13.3719e6", "12.7e6", "25.4e6", ""],
+		"tradeoff_curve_percent_step_size": 0.05,
+		"tradeoff_curve_percent_nstep_range": [1, 20],
 		"sub-region_scenarios": {
 			"include_subregion_scenarios": true,
-			"sub-region_folder": "",
+			"sub-region_folder": "subregions/",
 			"sub-region_raster_name": "countries-code.tif",
 			"sub-region_names_table": "countries-code.csv",
 			"sub-region_flat_targets": false,

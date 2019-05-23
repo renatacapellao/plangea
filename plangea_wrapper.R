@@ -16,23 +16,24 @@ plangea_wrapper = function(config_json_filename='plangea_config.json'){
   er_dir = paste0(rawdata_dir, cfg$io$lu_path, cfg$io$ecoregions_path)    # input ecoregions / original LC maps
   var_dir = paste0(rawdata_dir, cfg$io$variables_path)                    # input variables maps
   spp_dir = paste0(rawdata_dir, cfg$io$species_path)                      # input species maps
+  sr_dir = paste0(rawdata_dir,cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`) # sub-regions data
   in_dir = paste0(base_dir, cfg$io$processed_path)                        # preprocessed Rdata
   out_dir = paste0(base_dir, cfg$io$output_path)                          # output directory
   
   
-  # Harmonize data module ----------------------------------------------------
+  # Harmonize data module ------------------------------------------------------
   source('plangea_harmonize.R')
-  allvar_list = plangea_harmonize(cfg, config_json_filename = config_json_filename)
+  in_data = plangea_harmonize(cfg, config_json_filename = config_json_filename,
+                              verbose=T, force_comp = F)
   
   
-  # Scenarios module ---------------------------------------------------------
+  # Process module -------------------------------------------------------------
   source('plangea_scenarios.R')
-  scen_list = plangea_scenarios(cfg, allvar_list)
+  scen_list = plangea_scenarios(cfg, in_data)
   
   
-  # Run-optimization module --------------------------------------------------
-  source('plangea_call_solver.R')
-  res = plangea_call_solver(cfg, allvar_list, scen_list)
+  # Post-process module --------------------------------------------------------
+
   
   return(res)
 }
