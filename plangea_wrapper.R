@@ -21,19 +21,19 @@ plangea_wrapper = function(config_json_filename='plangea_config.json'){
   out_dir = paste0(base_dir, cfg$io$output_path)                          # output directory
   
   
-  # Harmonize data module ----------------------------------------------------
+  # Harmonize data module ------------------------------------------------------
   source('plangea_harmonize.R')
-  in_data = plangea_harmonize(cfg, config_json_filename = config_json_filename, verbose=T)
+  in_data = plangea_harmonize(cfg, config_json_filename = config_json_filename,
+                              verbose=T, force_comp = F)
   
   
-  # Scenarios module ---------------------------------------------------------
+  # Process module -------------------------------------------------------------
   source('plangea_scenarios.R')
   scen_list = plangea_scenarios(cfg, in_data)
   
   
-  # Run-optimization module --------------------------------------------------
-  source('plangea_call_solver.R')
-  res = plangea_call_solver(cfg, allvar_list, scen_list)
+  # Post-process module --------------------------------------------------------
+
   
   return(res)
 }

@@ -1,6 +1,5 @@
 # PLANGEA FUNCTIONS -------------------------------------------------------
 
-
 library(raster)
 library(Rsymphony)
 library(Matrix)
@@ -17,12 +16,19 @@ calc_sparable_area = function(projected_areas){
   projected_areas$total = projected_areas$total * ((dem_lnd+spa_lnd)/spa_lnd)
   projected_areas$total = -projected_areas$total
   
+  # Including overall projected area
+  projected_areas = rbind(projected_areas, c(nrow(projected_areas)+1, 0, 0) )
+  projected_areas$total[nrow(projected_areas)] = sum(projected_areas$total)
+  
   return(projected_areas)
 }
 
 calc_objective_function = function(var_list, type_list){
   b = Reduce('+', var_list[type_list=="B"])
   c = Reduce('+', var_list[type_list=="C"])
+  # b = Reduce('+', lapply(type_list=="B", function(x){var_list[x] * wgt_list[x]}))
+  # c = Reduce('+', lapply(type_list=="C", function(x){var_list[x] * wgt_list[x]}))
+  if (is.null(b)){b = c * (-c + abs(min(-c)) + 1)}
   if (is.null(c)){c=1}
   return(b/c)
 }
@@ -35,10 +41,30 @@ load_raster = function(raster_path, master_index=NULL){
   return(res)
 }
 
+pigz_save <- function(object, file, threads=parallel::detectCores()) {
+  con <- pipe(paste0("pigz -1 -p", threads, " > ", file), "wb")
+  saveRDS(object, file = con)
+  close(con)
+}
+
+pigz_load <-function(file, threads=parallel::detectCores()) {
+  con <- pipe(paste0("pigz -d -c -p", threads, " ", file))
+  object <- readRDS(file = con)
+  close(con)
+  return(object)
+}
+
 gen_usphab = function(n){
   res = as.matrix(expand.grid(replicate(n, 0:1, simplify = F)), ncol=n)
   res = res[rowSums(res == rep(0,n))!=5,] # removing solution with all zeroes
 }
+
+gen_wgt_list = function(in_wgts){
+  n_vars = length(in_wgts)
+  n_iter = Reduce('*', lapply(in_wgts, length))
+
+}
+
 
 plot_vals = function(x_vals, base_ras, master_index){
   base_ras[!is.na(base_ras)] = 0

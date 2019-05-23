@@ -12,7 +12,7 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
   # Update checks
   nfiles_check = (nrow(present_oc_info) != nrow(file_log$oc))         # number of files is not the same
   ctimes_check = (prod(present_oc_info$ctime > file_log$oc$ctime)==1) # creation times are not the same
-  rdata_check = (!file.exists(paste0(in_dir, 'harmonize_oc.Rdata')))  # resulting processed data file not found
+  rds_check = (!file.exists(paste0(in_dir, 'harmonize_oc')))  # resulting processed data file not found
   ready_check = !cfg$variables$ready_variables[cfg$variables$variable_names %in% # oc is not labeled as ready
                                                  (cfg$variables$calc_oc$oc_variable_name)]
   dependencies = flag_log$master
@@ -22,7 +22,7 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
   # Adding / updating 'lu' data to file_log (must be done *after* checks)
   file_log$oc = present_oc_info  
   
-  if ((nfiles_check | ctimes_check | rdata_check | dependencies | force_comp) & (ready_check | names_check)){
+  if ((nfiles_check | ctimes_check | rds_check | dependencies | force_comp) & (ready_check | names_check)){
     # Modifies control structures to indicate oc will be computed
     flag_log$oc = T
     
@@ -30,7 +30,7 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
     if (verbose) {cat(paste0('Computing opportunity costs results. Reason(s): \n',
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
-                             ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(rds_check, 'absent rds file \n', ''),
                              ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
@@ -46,14 +46,14 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
     
     oc = Reduce('+', mapply('*', cost_list, map_list, SIMPLIFY=F))
     
-    save(oc, file = paste0(in_dir, 'oc.Rdata'))
+    pigz_save(oc, file = paste0(in_dir, 'oc'))
   } else {
     if (verbose) {cat('Loading opportunity-cost data \n')}
-    load(paste0(in_dir, 'oc.Rdata'))
+    oc = pigz_load(paste0(in_dir, 'oc'))
   }
   
   oc_res = list(oc = oc, harmonize_log = file_log, update_flag = flag_log)
   
-  save(oc_res, file = paste0(in_dir, 'harmonize_oc.Rdata'))
+  pigz_save(oc_res, file = paste0(in_dir, 'harmonize_oc'))
   return(oc_res)
 }

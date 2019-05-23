@@ -27,13 +27,13 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log,
   ctimes_check = (sum(unlist(lapply(present_bd_info, function(x){x$ctime}), use.names = F) >
                         unlist(lapply(file_log$bd, function(x){x$ctime}), nrow,use.names = F)) > 0) 
   # resulting processed data file not found
-  rdata_check = (!file.exists(paste0(in_dir, 'harmonize_bd.Rdata')))
+  rds_check = (!file.exists(paste0(in_dir, 'harmonize_bd')))
   dependencies = flag_log$master
   
   # Adding / updating 'bd' data to file_log (must be done *after* checks)
   file_log$bd = present_bd_info  
   
-  if (nfiles_check | ctimes_check | rdata_check | dependencies | force_comp){
+  if (nfiles_check | ctimes_check | rds_check | dependencies | force_comp){
     # Modifies control structures to indicate lu_res will be computed
     flag_log$bd = T
     
@@ -41,7 +41,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log,
     if (verbose) {cat(paste0('Computing biodiversity layer. Reason(s): \n',
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
-                             ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(rds_check, 'absent rds file \n', ''),
                              ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
@@ -74,7 +74,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log,
     spp_vals = c()
     for (sf in cfg$variables$calc_bd$bd_subfolders){
       spp_vals = c(spp_vals, lapply(dir(paste0(spp_dir,sf), full.names=T),
-                                    function(x){print(paste0('loading raster ', x));
+                                    function(x){print(paste0('Loading raster ', x));
                                       load_raster(x, master_index=master_index)})) }
     names(spp_vals) = sub(x=unlist(raster_names), pattern='.tif', replacement='')
     
@@ -148,18 +148,29 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log,
     bd = calc_bd(slp = calc_extinction_slope(hab_now_areas, hab_pot_areas),
                  np, prop_restore, usphab_proc, usphab_index,
                  species_index_list_proc, g_scalar_bd)
-    
-    bd_res = list(bd = bd, usphab_index = usphab_index, 
+
+    bd_aux = list(bd = bd, usphab_index = usphab_index, 
                   species_index_list_proc = species_index_list_proc,
-                  hab_now_areas = hab_now_areas, hab_pot_areas = hab_pot_areas,
-                  harmonize_log = file_log, update_flag = flag_log)
+                  hab_now_areas = hab_now_areas, hab_pot_areas = hab_pot_areas)
     
-    save(bd_res, file = paste0(in_dir, 'harmonize_bd.Rdata'))
+    pigz_save(bd_aux, file = paste0(in_dir, 'bd_aux'))
+        
   } else {
     if (verbose) {cat('Loading biodiversity data \n')}
-    load(paste0(in_dir, 'harmonize_bd.Rdata'))
-    bd_res$flag_log$bd = F
+    bd_aux = pigz_load(paste0(in_dir, 'bd_aux'))
+    bd = bd_aux$bd
+    usphab_index = bd_aux$usphab_index 
+    species_index_list_proc = bd_aux$species_index_list_proc
+    hab_now_areas = bd_aux$hab_now_areas
+    hab_pot_areas = bd_aux$hab_pot_areas
     }
+
+  bd_res = list(bd = bd, usphab_index = usphab_index, 
+                species_index_list_proc = species_index_list_proc,
+                hab_now_areas = hab_now_areas, hab_pot_areas = hab_pot_areas,
+                harmonize_log = file_log, update_flag = flag_log)
   
+  pigz_save(bd_res, file = paste0(in_dir, 'harmonize_bd'))
+    
   return(bd_res)
 }

@@ -1,5 +1,5 @@
-plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index, 
-                                verbose=T, force_comp=F){
+plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
+                                        ub_vals, verbose=T, force_comp=F){
   
   # Adding 'sr' control flag to flag_log
   flag_log$sr = F
@@ -12,14 +12,15 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
   # Update checks
   nfiles_check = (nrow(present_sr_info) != nrow(file_log$sr))         # number of files is not the same
   ctimes_check = (prod(present_sr_info$ctime > file_log$sr$ctime)==1) # creation times are not the same
-  rdata_check = (!file.exists(paste0(in_dir, 'harmonize_sr.Rdata')))  # resulting processed data file not found
-  dependencies = flag_log$master
-  config_check = cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios # JSON asks to include SRs
-  
+  rds_check = (!file.exists(paste0(in_dir, 'harmonize_sr')))  # resulting processed data file not found
+  dependencies = (flag_log$master) |
+    (file_log$start$scenarios$`sub-region_scenarios`$`sub-region_flat_targets` !=
+       cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`) 
+
   # Adding / updating 'sr' data to file_log (must be done *after* checks)
   file_log$sr = present_sr_info
   
-  if ((nfiles_check | ctimes_check | rdata_check | dependencies | force_comp) & (config_check)){
+  if (nfiles_check | ctimes_check | rds_check | dependencies | force_comp){
     # Modifies control structures to indicate sr will be computed
     flag_log$sr = T
     
@@ -27,7 +28,7 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
     if (verbose) {cat(paste0('Computing sub-regions results. Reason(s): \n',
                              ifelse(nfiles_check, 'different number of input files \n', ''),
                              ifelse(ctimes_check, 'newer input files \n', ''),
-                             ifelse(rdata_check, 'absent Rdata file \n', ''),
+                             ifelse(rds_check, 'absent rds file \n', ''),
                              ifelse(dependencies, 'dependencies changed \n', ''),
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
@@ -44,19 +45,38 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
     # Coefficients for constraint equations pointing to pixels pertaining to each sub-region
     sr_coefs = matrix(t(sapply(sr_tbl$CODE, function(x){as.integer(sr_vals==x)})),
                            nrow=length(sr_tbl$CODE))
-    
-    # Adding entry in sR_coefs pointing to all px in master_index (to enable use of global constraints)
+
+    # Adding entry in SR_coefs pointing to all px in master_index (to enable use of global constraints)
     sr_coefs = rbind(sr_coefs, rep(1,length(master_index)))
+        
+    # Sub-region-targets data.frame
+    if (cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`){
+      sr_targets = rowSums(sr_coefs * ub_vals)
+    } else {
+      sr_targets = calc_sparable_area(read.csv(paste0(cfg$io$rawdata_path,
+                                                      cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`,
+                                                      cfg$scenarios$`sub-region_scenarios`$`sub-region_targets`)))
+    }
     
-    sr_res = list(sr_vals = sr_vals, sr_tbl = sr_tbl, sr_coefs = sr_coefs,
-                  harmonize_log = file_log, update_flag = flag_log)
+
+    sr_aux = list(sr_vals = sr_vals, sr_tbl = sr_tbl,
+                  sr_coefs = sr_coefs, sr_targets = sr_targets)
+    pigz_save(sr_aux, file = paste0(in_dir, 'sr_aux'))
     
-    save(sr_res, file = paste0(in_dir, 'harmonize_sr.Rdata'))
   } else {
-    if (verbose) {cat('Loading sub-regions data \n')}
-    load(paste0(in_dir, 'harmonize_sr.Rdata'))
-    sr_res$flag_log$sr = F
+      if (verbose) {cat('Loading sub-regions data \n')}
+      sr_aux = pigz_load(paste0(in_dir, 'sr_aux'))
+      sr_vals = sr_aux$sr_vals
+      sr_tbl = sr_aux$sr_tbl
+      sr_coefs = sr_aux$sr_coefs
+      sr_targets = sr_aux$sr_targets
   }
+  
+  sr_res = list(sr_vals = sr_vals, sr_tbl = sr_tbl, sr_coefs = sr_coefs,
+                sr_targets = sr_targets,
+                harmonize_log = file_log, update_flag = flag_log)
+  
+  pigz_save(sr_res, file = paste0(in_dir, 'harmonize_sr'))
   
   return(sr_res)
 }

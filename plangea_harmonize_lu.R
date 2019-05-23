@@ -11,12 +11,12 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
   # Update checks
   nfiles_check = (nrow(present_lu_info) != nrow(file_log$lu))         # number of files is not the same
   ctimes_check = (prod(present_lu_info$ctime > file_log$lu$ctime)==1) # creation times are not the same
-  rdata_check = (!file.exists(paste0(in_dir, 'harmonize_lu.Rdata')))  # resulting processed data file not found
+  rds_check = (!file.exists(paste0(in_dir, 'harmonize_lu')))  # resulting processed data file not found
   
   # Adding / updating 'lu' data to file_log (must be done *after* checks)
   file_log$lu = present_lu_info  
   
-  if (nfiles_check | ctimes_check | rdata_check | force_comp){
+  if (nfiles_check | ctimes_check | rds_check | force_comp){
     # Modifies control structures to indicate lu_res will be computed
     flag_log$lu = T
     
@@ -24,7 +24,7 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     if (verbose) {cat(paste0('Computing land-use results. Reason(s): \n',
                                ifelse(nfiles_check, 'different number of input files \n', ''),
                                ifelse(ctimes_check, 'newer input files \n', ''),
-                               ifelse(rdata_check, 'absent Rdata file \n', ''),
+                               ifelse(rds_check, 'absent rds file \n', ''),
                                ifelse(force_comp, 'because you said so! \n', '')
                                ))}
     
@@ -51,10 +51,10 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     
     # Create auxiliary results list
     lu_aux = list(terrestrial_index = terrestrial_index,
-                  lu_class_types = lu_class_types, px_area = px_area)
+                  lu_class_types = lu_class_types)
     
-    save(lu_ras, file = paste0(in_dir, 'lu_ras.Rdata'))
-    save(lu_aux, file = paste0(in_dir, 'lu_aux.Rdata'))
+    pigz_save(lu_ras, file = paste0(in_dir, 'lu_ras'))
+    pigz_save(lu_aux, file = paste0(in_dir, 'lu_aux'))
     
     # Updating / loading master_index
     source('plangea_harmonize_master_index.R')
@@ -65,6 +65,7 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
                                             force_comp=force_comp)
     
     master_index = mi_res$master_index
+    ub_vals = mi_res$ub_vals
     overall_area = mi_res$overall_area
     px_area = mi_res$px_area
     file_log = mi_res$file_log
@@ -73,16 +74,16 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     
     # Computing lu_vals list (percent of the pixel in the master_index covered by each LU)
     lu_vals = lapply(lu_ras, function(x){x[master_index]})
-    save(lu_vals, file = paste0(in_dir, 'lu_vals.Rdata'))
+    pigz_save(lu_vals, file = paste0(in_dir, 'lu_vals'))
     
   } else { # else related to updated land-use rasters
     if (verbose) {cat('Loading auxiliary land-use data \n')}
-    load(paste0(in_dir, 'lu_aux.Rdata'))
+    lu_aux = pigz_load(paste0(in_dir, 'lu_aux'))
     terrestrial_index = lu_aux$terrestrial_index
     lu_class_types = lu_aux$lu_class_types
     # Loads land-use rasters (even if they didn't change, the master_index did)
     if (verbose) {cat('Loading land-use-raster data \n')}
-    load(paste0(in_dir, 'lu_ras.Rdata'))
+    lu_ras = pigz_load(paste0(in_dir, 'lu_ras'))
     
     source('plangea_harmonize_master_index.R')
     
@@ -92,28 +93,30 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
                                             force_comp=force_comp)
     
     master_index = mi_res$master_index
+    ub_vals = mi_res$ub_vals
     overall_area = mi_res$overall_area
     px_area = mi_res$px_area
     file_log = mi_res$file_log
     flag_log = mi_res$flag_log
     rm(mi_res)
     
-    if (flag_log$master == T | (!file.exists(paste0(in_dir, 'lu_vals.Rdata'))) ){
+    if (flag_log$master == T | (!file.exists(paste0(in_dir, 'lu_vals'))) ){
       # Updates lu_vals list (percent of the pixel in the master_index covered by each LU)
       lu_vals = lapply(lu_ras, function(x){x[master_index]})
-      save(lu_vals, file = paste0(in_dir, 'lu_vals.Rdata'))
+      pigz_save(lu_vals, file = paste0(in_dir, 'lu_vals'))
     } else {
       if (verbose) {cat('Loading land-use-values data \n')}
-      load(paste0(in_dir, 'lu_vals.Rdata'))
-      } # end else related to updated master_index or unavailable lu_vals.Rdata
+      lu_vals = pigz_load(paste0(in_dir, 'lu_vals'))
+      } # end else related to updated master_index or unavailable lu_vals
   } # end else related to updated land-use rasters
 
   lu_res = list(master_index=master_index, lu_vals=lu_vals,
                 terrestrial_index = terrestrial_index,
                 lu_class_types = lu_class_types,
-                overall_area = overall_area, px_area = px_area,
+                ub_vals = ub_vals, overall_area = overall_area,
+                px_area = px_area,
                 harmonize_log = file_log, update_flag = flag_log)
   
-  save(lu_res, file = paste0(in_dir, 'harmonize_lu.Rdata'))
+  pigz_save(lu_res, file = paste0(in_dir, 'harmonize_lu'))
   return(lu_res)
 }
