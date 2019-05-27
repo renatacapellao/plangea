@@ -27,6 +27,9 @@ plangea_scenarios = function(cfg, in_data){
   # Limits to overall targets for purpose of refreshing variables
   refresh_stepsizes = 1 / cfg$scenarios$refresh_nsteps_per_benchmark
 
+  
+  source('plangea_process_solver.R')
+  source('plangea_process_refresh_vars.R')
   for (iter_target_name in cfg$scenarios$target_names) {
     # Actual value for the iteration's overall target from iteration's target name
     iter_targets = as.numeric(cfg$scenarios$targets[cfg$scenarios$target_names == iter_target_name])
@@ -68,28 +71,38 @@ plangea_scenarios = function(cfg, in_data){
             if (cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios){
               # Substituting total available area in sr_targets for iter_target
               in_data$sr_targets$total[nrow(in_data$sr_targets)] = iter_targets
-              # Modifying targets per sub-region to the iteration's iter_tradeoff
+              # Resizing targets per sub-region using the iteration's iter_tradeoff
               iter_targets = in_data$sr_targets$total * iter_tradeoff
-              # For sub-regions, the matrix is given by sr_coefs
+              # For sub-regions, the problem matrix is given by sr_coefs
               problem_matrix = in_data$sr_coefs
-            } else {
+            } else { #that is, include subregion flag in the config json is false
               iter_targets = iter_targets * iter_tradeoff
+              # in this case, the problem matrix is trivial
               problem_matrix = rep(1, length(master_index))
             }
             
             for (iter_refresh_lim in iter_refresh_points){
+              # Starting values for the solver-solution object
+              if (!exists(iter_res)){iter_res = rep(0, length(in_data$master_index))}
+
+              # Actual target to be sent to the solver, resized to a refresh-step
+              iter_targets = iter_targets * iter_refresh_lim
+              
               # Result file suffix for refresh loop
               iter_refresh_prt = paste0('_refresh-step_',
                                         which(iter_refresh_points==iter_refresh_lim))
+              # Name to save the resulting file for the solver call of the iteration
+              iter_filename = paste0(iter_target_name, iter_ublim_prt, iter_scen_prt,
+                           iter_wgt_prt, iter_tradeoff_prt, iter_refresh_prt)
+              print(iter_filename)
               
-              iter_targets = iter_targets * iter_refresh_lim
+              iter_res = plangea_process_solver(obj = iter_obj,
+                                                mat = problem_matrix,
+                                                rhs = iter_targets,
+                                                bounds = iter_ub,
+                                                iter_filename = iter_filename)
               
-              print(paste0(iter_target_name, iter_ublim_prt, iter_scen_prt,
-                           iter_wgt_prt, iter_tradeoff_prt, iter_refresh_prt))
-              #iter_res = plangea_process_solver(obj = iter_obj,
-              #                                  mat = problem_matrix,
-              #                                  rhs = iter_targets,
-              #                                  bounds = iter_ub)
+              
             } # end of iter_refresh lim loop
           } # end of iter_tradeoff loop
         } # end of wgt_row loop

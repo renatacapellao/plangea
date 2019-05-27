@@ -28,6 +28,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                 force_comp = force_comp)
   
   lu_vals = lu_res$lu_vals
+  lu_terr = lu_res$lu_terr
   master_index = lu_res$master_index
   terrestrial_index = lu_res$terrestrial_index
   ub_vals = lu_res$ub_vals
@@ -116,8 +117,10 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   source('plangea_harmonize_bd.R')
   
   bd_res = plangea_harmonize_bd(cfg, file_log = harmonize_log,
-                                flag_log = update_flag, lu_vals = lu_vals,
-                                master_index = master_index, oa_vals = oa_vals,
+                                flag_log = update_flag, lu_terr = lu_terr,
+                                master_index = master_index,
+                                terrestrial_index = terrestrial_index,
+                                oa_vals = oa_vals,
                                 verbose = verbose,
                                 force_comp = force_comp)
 

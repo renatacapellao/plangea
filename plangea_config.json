@@ -8,7 +8,9 @@
 		"variables_path": "variables/",
 		"species_path": "species/placeholder_for_dev/",
 		"processed_path": "processed/",
-		"output_path": "results/"
+		"output_path": "results/",
+		"solver_results_path": "solver_runs/",
+		"post_processed_path": "post_processed/"
 	},
 
 	"variables": {

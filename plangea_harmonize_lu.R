@@ -49,6 +49,10 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     # Builds index with terrestrial pixels
     terrestrial_index = which(values(terrestrial_areas > 0))
     
+    # Computing lu_terr list (percent of the pixel in the terrestrial_index covered by each LU)
+    lu_terr = lapply(lu_ras, function(x){x[terrestrial_index]})
+    pigz_save(lu_terr, file = paste0(in_dir, 'lu_terr'))
+    
     # Create auxiliary results list
     lu_aux = list(terrestrial_index = terrestrial_index,
                   lu_class_types = lu_class_types)
@@ -110,7 +114,8 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
       } # end else related to updated master_index or unavailable lu_vals
   } # end else related to updated land-use rasters
 
-  lu_res = list(master_index=master_index, lu_vals=lu_vals,
+  lu_res = list(lu_vals=lu_vals, lu_terr=lu_terr,
+                master_index=master_index, 
                 terrestrial_index = terrestrial_index,
                 lu_class_types = lu_class_types,
                 ub_vals = ub_vals, overall_area = overall_area,
