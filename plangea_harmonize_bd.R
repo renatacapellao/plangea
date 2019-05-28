@@ -114,10 +114,11 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
         oa_terr[[nat_lu]][terrestrial_index %in% master_index] = oa_vals[[nat_lu]]
       }
 
-      hab_pot_terr = c(hab_pot_terr, list(spp_terr[names(spp_terr) == spid][[1]] *  # species range for spid
-                                            Reduce('+', oa_terr[names(oa_terr) %in% spid_lu])))          # sum of suitable lu for spid
+      hab_pot_terr = c(hab_pot_terr,
+                       list(spp_terr[names(spp_terr) == spid][[1]] *  # species range for spid
+                                            Reduce('+', oa_terr[names(oa_terr) %in% spid_lu]))) # sum of suitable lu for spid
       
-      # usphab_index computation ---------------------------------------------    
+      # usphab_index computation -----------------------------------------------    
       # Corresponding entry on usphab_proc rows for spid
       spid_proc = as.numeric(nat_cls %in% spid_lu)
       
@@ -131,10 +132,10 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     names(hab_now_terr) = spid_list
     names(hab_pot_terr) = spid_list
     
-    # species_index_list_proc computation ----------------------------------
-    species_index_list_proc = lapply(spp_terr, function(x){which(x==1)})
+    # List of indices in which each species occur, subsetted to master_index ---
+    #species_index_list_proc = lapply(spp_terr, function(x){which((x==1) & (terrestrial_index %in% master_index))})
+    species_index_list_proc = lapply(spp_terr, function(x){x=x[terrestrial_index %in% master_index]; which(x==1)})
     
-    np = length(terrestrial_index)
     hab_now_areas = sapply(hab_now_terr, sum)
     hab_pot_areas = sapply(hab_pot_terr, sum)
     
@@ -148,7 +149,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     hab_pot_areas = hab_pot_areas[valid_spid_ptr]
     
     bd = calc_bd(slp = calc_extinction_slope(hab_now_areas, hab_pot_areas),
-                 np, prop_restore, usphab_proc, usphab_index,
+                 prop_restore, usphab_proc, usphab_index,
                  species_index_list_proc)
 
     bd_aux = list(bd = bd, usphab_index = usphab_index, 

@@ -79,21 +79,21 @@ spplot_vals = function(x_vals, base_ras, master_index){
 }
 
 # Legacy calc_bd ------------------------------------------------------------
-calc_bd <- function(slp, np, prop_restore, usphab_proc, usphab_index,
-                    species_index_list_proc, g_scalar_bd){
-  bd <- rep(0, np)
+calc_bd <- function(slp, prop_restore, usphab_proc, usphab_index,
+                    species_index_list_proc){
+  bd <- rep(0, nrow(prop_restore))
   for (i in 1:dim(usphab_proc)[1]){
     hab_values <- prop_restore %*% usphab_proc[i,]
     if(length(usphab_index[[i]])>0){
       for (j in 1:length(usphab_index[[i]])){
+        #print(paste(i, j, length(bd), length(bd[recs]+slp[usphab_index[[i]][j]]*hab_values[recs])))
         if (!is.null(species_index_list_proc[[usphab_index[[i]][j]]])){
           recs <- species_index_list_proc[[usphab_index[[i]][j]]]
-          bd[recs] <- bd[recs] + slp[usphab_index[[i]][j]] * hab_values[recs]
+          bd[recs] = bd[recs] + slp[usphab_index[[i]][j]] * hab_values[recs]
         }
       }      
     }
   }
-  bd <- bd * g_scalar_bd
   return(bd)
 }
 
