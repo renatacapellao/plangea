@@ -6,4 +6,6 @@ plangea_process_solver = function(obj, mat, rhs, bounds, iter_filename){
   if (result$status == 0){result$status = "OPTIMAL"}
   
   pigz_save(result, file = paste0(run_dir, iter_filename))
+  
+  return(result$x)
 }

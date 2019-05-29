@@ -1,4 +1,7 @@
-plangea_scenarios = function(cfg, in_data){
+plangea_scenarios = function(cfg, in_data, verbose=T){
+  # Area scaling factor
+  g_scalar_area = cfg$landscape_features$area_scaling_factor
+  
   # List with scenario targets (overall)
   targets=as.numeric(cfg$scenarios$targets)
   names(targets) = cfg$scenarios$target_names
@@ -29,10 +32,10 @@ plangea_scenarios = function(cfg, in_data){
 
   
   source('plangea_process_solver.R')
-  source('plangea_process_refresh_vars.R')
+  source('plangea_refresh_vars.R')
   for (iter_target_name in cfg$scenarios$target_names) {
     # Actual value for the iteration's overall target from iteration's target name
-    iter_targets = as.numeric(cfg$scenarios$targets[cfg$scenarios$target_names == iter_target_name])
+    iter_cfg_targets = as.numeric(cfg$scenarios$targets[cfg$scenarios$target_names == iter_target_name])
     
     for (iter_ublim in cfg$scenarios$upper_bounds_limits){
       # Result file suffix for ublim loop
@@ -72,21 +75,21 @@ plangea_scenarios = function(cfg, in_data){
               # Substituting total available area in sr_targets for iter_target
               in_data$sr_targets$total[nrow(in_data$sr_targets)] = iter_targets
               # Resizing targets per sub-region using the iteration's iter_tradeoff
-              iter_targets = in_data$sr_targets$total * iter_tradeoff
+              iter_targets_tradeoff = in_data$sr_targets$total * iter_tradeoff
               # For sub-regions, the problem matrix is given by sr_coefs
-              problem_matrix = in_data$sr_coefs
+              problem_matrix = in_data$sr_coefs * g_scalar_area
             } else { #that is, include subregion flag in the config json is false
-              iter_targets = iter_targets * iter_tradeoff
+              iter_targets_tradeoff = iter_cfg_targets * iter_tradeoff
               # in this case, the problem matrix is trivial
-              problem_matrix = rep(1, length(master_index))
+              problem_matrix = matrix(rep(g_scalar_area, length(master_index)), nrow=1)
             }
             
+            # Resets object storing the cumulative area restored in each refresh-step
+            iter_res_cum = rep(0, length(master_index))
+            
             for (iter_refresh_lim in iter_refresh_points){
-              # Starting values for the solver-solution object
-              if (!exists(iter_res)){iter_res = rep(0, length(in_data$master_index))}
-
               # Actual target to be sent to the solver, resized to a refresh-step
-              iter_targets = iter_targets * iter_refresh_lim
+              iter_targets = iter_targets_tradeoff * iter_refresh_lim / mean(in_data$px_area / 100)
               
               # Result file suffix for refresh loop
               iter_refresh_prt = paste0('_refresh-step_',
@@ -94,7 +97,8 @@ plangea_scenarios = function(cfg, in_data){
               # Name to save the resulting file for the solver call of the iteration
               iter_filename = paste0(iter_target_name, iter_ublim_prt, iter_scen_prt,
                            iter_wgt_prt, iter_tradeoff_prt, iter_refresh_prt)
-              print(iter_filename)
+              if (verbose){print(iter_filename)}
+              print(iter_targets)
               
               iter_res = plangea_process_solver(obj = iter_obj,
                                                 mat = problem_matrix,
@@ -102,7 +106,24 @@ plangea_scenarios = function(cfg, in_data){
                                                 bounds = iter_ub,
                                                 iter_filename = iter_filename)
               
+              # Updates upper bounds to remove selected areas
+              iter_ub = iter_ub - iter_res
               
+              # Updates object storing the cumulative area restored in each refresh-step
+              iter_res_cum = iter_res_cum + iter_res
+              
+              # Refreshes variables
+              refreshed_vars = plangea_refresh_vars(cfg, upper_env = mget(objects()),
+                                                       verbose=verbose)
+              
+              # Refreshed varlist
+              refreshed_varlist = mapply('*', iter_wgt * sf_list, refreshed_vars[iter_ptr], SIMPLIFY = F)
+              
+              # Recomputes objective function
+              iter_obj = calc_objective_function(var_list = refreshed_varlist, type_list)
+              
+              print(sum(iter_res))
+              print(spplot_vals(iter_res, base_ras = lu_ras[[1]], master_index))
             } # end of iter_refresh lim loop
           } # end of iter_tradeoff loop
         } # end of wgt_row loop

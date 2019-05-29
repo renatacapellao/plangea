@@ -61,7 +61,7 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
     overall_area = mi_aux$overall_area
     px_area = mi_aux$px_area
 }
-  return(list(master_index = master_index,
+  return(list(master_index = master_index, px_area = px_area,
               ub_vals = ub_vals, overall_area = overall_area,
               file_log = file_log, flag_log = flag_log))
 }

@@ -1,8 +1,9 @@
 # WRAPPER FOR RUNNING PLANGEA BASED ON AN INPUT JSON CONFIG FILE ----------
 
 
-plangea_wrapper = function(config_json_filename='plangea_config.json'){
+plangea_wrapper = function(config_json_filename='./example-global/plangea_config.json'){
   source('plangea_functions.R')
+  source('plangea_refresh_vars.R')
   
   # Read JSON config file
   cfg = fromJSON(config_json_filename)
@@ -41,7 +42,7 @@ plangea_wrapper = function(config_json_filename='plangea_config.json'){
   # Harmonize data module ------------------------------------------------------
   source('plangea_harmonize.R')
   in_data = plangea_harmonize(cfg, config_json_filename = config_json_filename,
-                              verbose=T, force_comp = T)
+                              verbose=T, force_comp = F)
   
   
   # Process module -------------------------------------------------------------

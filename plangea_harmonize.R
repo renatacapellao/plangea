@@ -54,8 +54,6 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   update_flag = ready_res$update_flag
   rm(ready_res)
 
-
-
   
   # Sub-module: opportunity cost -----------------------------------------------
   source('plangea_harmonize_oc.R')
@@ -110,7 +108,13 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
     update_flag = sr_res$update_flag
     rm(sr_res)    
   }
-
+  
+  
+  # Sub-module: include refreshable variables into allvar_list -----------------
+  # (plangea_refresh_vars script is sourced at the wrapper level)
+  
+  refresh_res = plangea_refresh_vars(cfg, upper_env = mget(objects()),
+                                     verbose = verbose)
   
   
   # Sub-module: biodiversity ---------------------------------------------------
@@ -141,6 +145,6 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   
   # Saving rdss and returning ------------------------------------------------
   harmonize_res = mget(objects())
-  pigz_save(harmonize_res, file='harmonize_full_envir')
+  pigz_save(harmonize_res, file=paste0(in_dir, 'harmonize_full_envir'))
   return(harmonize_res)
 }

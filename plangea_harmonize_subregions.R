@@ -53,7 +53,7 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
     if (cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`){
       sr_targets = rowSums(sr_coefs * ub_vals)
     } else {
-      sr_targets = calc_sparable_area(read.csv(paste0(cfg$io$rawdata_path,
+      sr_targets = calc_sparable_area(read.csv(paste0(rawdata_dir,
                                                       cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`,
                                                       cfg$scenarios$`sub-region_scenarios`$`sub-region_targets`)))
     }

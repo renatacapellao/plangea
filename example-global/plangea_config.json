@@ -1,6 +1,6 @@
 {
 	"io": {
-	  "base_path": "~/Documents/IIS_PROJECTS/plangea/",
+	  "base_path": "~/Documents/IIS_PROJECTS/plangea/example-global/",
 		"rawdata_path": "rawdata/",
 		"lu_path": "land-use/",
 		"past_lu_path": "past/",
@@ -14,16 +14,23 @@
 	},
 
 	"variables": {
-		"variable_names": ["cb", "bd", "oc"],   
-		"variable_types": ["B", "B", "C"],  
-		"variable_weights": [1, [1, 10, 100, 1000], 1],
-		"variable_scaling_factor": [1e-3, 1e2, 1e-4],
-		"ready_variables": [true, true, false],  
+		"variable_names": ["cb", "bd", "oc", "ph"],   
+		"variable_types": ["B", "B", "C", "B"],  
+		"variable_weights": [1, [1, 10, 100, 1000], 1, [0.5, 1, 2]],
+		"variable_scaling_factor": [1e-3, 1e2, 1e-4, 1],
+		"ready_variables": [true, false, false, false],  
 		"ready_variables_raster_names": [
 		  "DELTA_C_BiomassSoil30cm_v12.1.tif",
-		  "opportunity_costs_cropland_4.9km_Molweide.tif",
+		  "",
+		  "",
 		  ""
 		  ],
+		"refresh_variables_script_names":[
+		  "",
+		  "",
+		  "",
+		  "calc_placeholder.R"
+		],
 		"calc_oc": {
 		  "oc_variable_name": "oc",
 		  "oc_names": ["occ", "ocg"],
@@ -94,7 +101,7 @@
 		"tradeoff_curve_percent_step_size": 0.05,
 		"tradeoff_curve_percent_nstep_range": [1, 20],
 		"sub-region_scenarios": {
-			"include_subregion_scenarios": true,
+			"include_subregion_scenarios": false,
 			"sub-region_folder": "subregions/",
 			"sub-region_raster_name": "countries-code.tif",
 			"sub-region_names_table": "countries-code.csv",
