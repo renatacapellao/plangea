@@ -154,7 +154,8 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
 
     bd_aux = list(bd = bd, usphab_index = usphab_index, 
                   species_index_list_proc = species_index_list_proc,
-                  hab_now_areas = hab_now_areas, hab_pot_areas = hab_pot_areas)
+                  hab_now_areas = hab_now_areas, hab_pot_areas = hab_pot_areas,
+                  prop_restore = prop_restore)
     
     pigz_save(bd_aux, file = paste0(in_dir, 'bd_aux'))
         
@@ -166,11 +167,13 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     species_index_list_proc = bd_aux$species_index_list_proc
     hab_now_areas = bd_aux$hab_now_areas
     hab_pot_areas = bd_aux$hab_pot_areas
+    prop_restore = bd_aux$prop_restore
     }
 
-  bd_res = list(bd = bd, usphab_index = usphab_index, 
+  bd_res = list(bd = bd, usphab_index = usphab_index, usphab_proc = usphab_proc,
                 species_index_list_proc = species_index_list_proc,
                 hab_now_areas = hab_now_areas, hab_pot_areas = hab_pot_areas,
+                prop_restore = prop_restore,
                 harmonize_log = file_log, update_flag = flag_log)
   
   pigz_save(bd_res, file = paste0(in_dir, 'harmonize_bd'))

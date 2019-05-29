@@ -97,6 +97,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                           flag_log = update_flag,
                                           master_index = master_index,
                                           ub_vals = ub_vals,
+                                          px_area = px_area,
                                           verbose = verbose, 
                                           force_comp = force_comp)
     
@@ -113,7 +114,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   # Sub-module: include refreshable variables into allvar_list -----------------
   # (plangea_refresh_vars script is sourced at the wrapper level)
   
-  refresh_res = plangea_refresh_vars(cfg, upper_env = mget(objects()),
+  allvar_list = plangea_refresh_vars(cfg, upper_env = mget(objects()),
                                      verbose = verbose)
   
   
@@ -129,10 +130,12 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                 force_comp = force_comp)
 
   bd = bd_res$bd
+  usphab_proc = bd_res$usphab_proc
   usphab_index = bd_res$usphab_index 
   species_index_list_proc = bd_res$species_index_list_proc
   hab_now_areas = bd_res$hab_now_areas
   hab_pot_areas = bd_res$hab_pot_areas
+  prop_restore = bd_res$prop_restore
   harmonize_log = bd_res$harmonize_log
   update_flag = bd_res$update_flag
   rm(bd_res)

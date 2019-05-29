@@ -65,7 +65,6 @@ gen_wgt_list = function(in_wgts){
 
 }
 
-
 plot_vals = function(x_vals, base_ras, master_index){
   #base_ras[!is.na(base_ras)] = 0
   base_ras[master_index] = x_vals
@@ -74,8 +73,8 @@ plot_vals = function(x_vals, base_ras, master_index){
 
 spplot_vals = function(x_vals, base_ras, master_index){
   #base_ras[!is.na(base_ras)] = 0
-  base_ras[master_index] = x_vals
-  spplot(base_ras)
+  res = stack(sapply(x_vals, function(x){y=base_ras; y[master_index] = x; return(y)}))
+  spplot(res)
 }
 
 

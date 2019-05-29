@@ -51,10 +51,9 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     
     # Computing lu_terr list (percent of the pixel in the terrestrial_index covered by each LU)
     lu_terr = lapply(lu_ras, function(x){x[terrestrial_index]})
-    pigz_save(lu_terr, file = paste0(in_dir, 'lu_terr'))
-    
+
     # Create auxiliary results list
-    lu_aux = list(terrestrial_index = terrestrial_index,
+    lu_aux = list(lu_terr = lu_terr, terrestrial_index = terrestrial_index,
                   lu_class_types = lu_class_types)
     
     pigz_save(lu_ras, file = paste0(in_dir, 'lu_ras'))
@@ -83,6 +82,7 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
   } else { # else related to updated land-use rasters
     if (verbose) {cat('Loading auxiliary land-use data \n')}
     lu_aux = pigz_load(paste0(in_dir, 'lu_aux'))
+    lu_terr = lu_aux$lu_terr
     terrestrial_index = lu_aux$terrestrial_index
     lu_class_types = lu_aux$lu_class_types
     # Loads land-use rasters (even if they didn't change, the master_index did)

@@ -1,5 +1,5 @@
 plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
-                                        ub_vals, verbose=T, force_comp=F){
+                                        ub_vals, px_area, verbose=T, force_comp=F){
   
   # Adding 'sr' control flag to flag_log
   flag_log$sr = F
@@ -51,11 +51,11 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
         
     # Sub-region-targets data.frame
     if (cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`){
-      sr_targets = rowSums(sr_coefs * ub_vals)
+      sr_targets = rowSums(sr_coefs * ub_vals * px_area)
     } else {
       sr_targets = calc_sparable_area(read.csv(paste0(rawdata_dir,
                                                       cfg$scenarios$`sub-region_scenarios`$`sub-region_folder`,
-                                                      cfg$scenarios$`sub-region_scenarios`$`sub-region_targets`)))
+                                                      cfg$scenarios$`sub-region_scenarios`$`sub-region_target_areas_sqkm`)))
     }
     
 
