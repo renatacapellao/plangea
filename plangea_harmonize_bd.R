@@ -164,6 +164,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     bd_aux = pigz_load(paste0(in_dir, 'bd_aux'))
     bd = bd_aux$bd
     usphab_index = bd_aux$usphab_index 
+    usphab_proc = bd_aux$usphab_proc
     species_index_list_proc = bd_aux$species_index_list_proc
     hab_now_areas = bd_aux$hab_now_areas
     hab_pot_areas = bd_aux$hab_pot_areas

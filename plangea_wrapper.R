@@ -42,10 +42,15 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   # Harmonize data module ------------------------------------------------------
   source('plangea_harmonize.R')
   in_data = plangea_harmonize(cfg, config_json_filename = config_json_filename,
-                              verbose=T, force_comp = T)
+                              verbose=T, force_comp = F)
   
   
   # Process module -------------------------------------------------------------
+  
+  #in_data = pigz_load('./example-global/processed/harmonize_full_envir')
+  #lu_ras = pigz_load('./example-global/processed/lu_ras')
+  #bg = lu_ras[[1]] / lu_ras[[1]]
+  #bg[bg==1] = 0
   source('plangea_scenarios.R')
   scen_list = plangea_scenarios(cfg, in_data)
   

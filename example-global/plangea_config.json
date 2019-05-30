@@ -89,19 +89,19 @@
 	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_wetland.tif"
 	    ]
 	  },
-	  "area_scaling_factor": ""
+	  "area_scaling_factor": "1e4"
 	},
 
 	"scenarios": {
 		"problem_type": "R", 
-		"benchmark_scenarios": ["cb", "bd", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
+		"benchmark_scenarios": ["bd", "cb", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
 		"refresh_nsteps_per_benchmark": [1, 10, 1, 10, 1, 10, 10],
-		"target_names": ["BONN", "NYDC", "CTRY", "CBD", "CBD2", "WRLD"],
-		"target_areas_sqkm": ["1.5e6", "3.5e6", "13.3719e6", "4.3056e6", "8.6112e6", ""],
-		"tradeoff_curve_percent_step_size": 0.05,
+		"target_names": ["WRLD", "CBD"],
+		"target_areas_sqkm": ["", "4.3056e6"],
+		"tradeoff_curve_percent_step_size": 0.15,
 		"tradeoff_curve_percent_nstep_range": [1, 20],
 		"sub-region_scenarios": {
-			"include_subregion_scenarios": true,
+			"include_subregion_scenarios": false,
 			"sub-region_folder": "subregions/",
 			"sub-region_raster_name": "countries-code.tif",
 			"sub-region_names_table": "countries-code.csv",

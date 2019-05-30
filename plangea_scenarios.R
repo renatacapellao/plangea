@@ -54,6 +54,9 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
   
   source('plangea_process_solver.R')
   source('plangea_refresh_vars.R')
+  
+  start_time = Sys.time()
+  
   for (iter_target_name in cfg$scenarios$target_names) {
     # Actual value for the iteration's overall target from iteration's target name
     iter_cfg_targets = as.numeric(targets[cfg$scenarios$target_names == iter_target_name])
@@ -102,6 +105,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
             } else { #that is, include subregion flag in the config json is false
               iter_targets_tradeoff = iter_cfg_targets * iter_tradeoff
               # in this case, the problem matrix is trivial
+              #problem_matrix = matrix(rep(1, length(in_data$master_index)), nrow=1)
               problem_matrix = matrix(in_data$px_area, nrow=1)
             }
             
@@ -119,25 +123,30 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
               iter_filename = paste0(iter_target_name, iter_ublim_prt, iter_scen_prt,
                            iter_wgt_prt, iter_tradeoff_prt, iter_refresh_prt)
               if (verbose){print(iter_filename)}
-              print(iter_targets)
               
+              iter_start = Sys.time()
               iter_res = plangea_process_solver(obj = iter_obj,
-                                                mat = problem_matrix * g_scalar_area,
-                                                rhs = iter_targets * g_scalar_area,
-                                                bounds = iter_ub,
+                                                mat = problem_matrix,
+                                                rhs = iter_targets,
+                                                ub = iter_ub,
                                                 iter_filename = iter_filename)
+              if (verbose){cat(paste('Solver time:', round(Sys.time() - iter_start, digits=2),
+                                       '| Total time elapsed:', round(Sys.time() - start_time, digits=2),
+                                       '\n'))}
               
-             if (verbose){print(sum(iter_res * in_data$px_area))
-               bg = lu_ras[[1]] / lu_ras[[1]]
-               bg[bg==1] = 0
-               print(spplot_vals(iter_res, base_ras = bg, in_data$master_index))}
+              #return(mget(objects()))
               
               # Updates upper bounds to remove selected areas
               iter_ub = iter_ub - iter_res
               
               # Updates object storing the cumulative area restored in each refresh-step
               iter_res_cum = iter_res_cum + iter_res
-              
+
+              #if (verbose){#print(hist(iter_res[iter_res>0]))
+                #print(sum(iter_res * in_data$px_area))
+                #print(spplot_vals(iter_res_cum, base_ras = bg, in_data$master_index))
+                #}
+                            
               # Refreshes variables (if the iteration's scenario have refresh steps)
               if (length(iter_refresh_points) > 1){
                 refreshed_vars = plangea_refresh_vars(cfg,
