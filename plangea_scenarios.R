@@ -1,5 +1,8 @@
 plangea_scenarios = function(cfg, in_data, verbose=T){
   
+  # Unpacking in_data variables
+  for (i in 1:length(in_data)) {assign(names(in_data)[i], in_data[[i]])}
+  
   # Variables scaling factor ---------------------------------------------------
   # (global values were cb 1e-3, bd 1e2, oc 1e-4)
   sf_list = as.numeric(cfg$variables$variable_scaling_factor)
@@ -9,7 +12,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
   auto_sf_vars = cfg$variables$variable_names[which(sapply(sf_list, is.na))]
   
   # Computing scaling factors of variables in auto_sf_vars
-  auto_sf_vals = lapply(in_data$allvar_list[auto_sf_vars], function(x){(10^(2.5)) / max(x, na.rm=T)})
+  auto_sf_vals = lapply(allvar_list[auto_sf_vars], function(x){(10^(1.5)) / max(x, na.rm=T)})
   
   # Filling sf_list with auto_sf_vals
   sf_list[auto_sf_vars] = auto_sf_vals
@@ -21,13 +24,13 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
   targets = as.list(targets)
   
   # Filling empty targets with total area of interest
-  targets[[which(sapply(targets, is.na))]] = sum(in_data$ub_vals * in_data$px_area)
+  targets[[which(sapply(targets, is.na))]] = sum(ub_vals * px_area)
   
   # Area scaling factor (global value was 1e4)
   g_scalar_area = as.numeric(cfg$landscape_features$area_scaling_factor)
   
   # Filling up g_scalar_area if value is missing in config json
-  if(is.na(g_scalar_area)){g_scalar_area = (10^(3.5)) / max(unlist(targets))}
+  if(is.na(g_scalar_area)){g_scalar_area = (10^(1.5)) / max(unlist(targets))}
   
   
   # Trade-off limits -----------------------------------------------------------
@@ -72,9 +75,9 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
         iter_scen_prt = paste0('_scen_', paste(iter_varnames, collapse = '-'))
         iter_refresh_stepsize = refresh_stepsizes[iter_scencode]
         iter_refresh_points = seq(from=iter_refresh_stepsize, to=1, by=iter_refresh_stepsize)
-        iter_ub = in_data$ub_vals * iter_ublim
+        iter_ub = ub_vals * iter_ublim
         # Pointer for variables to be included in the iteration's objective calculation
-        iter_ptr = names(in_data$allvar_list) %in% iter_varnames
+        iter_ptr = names(allvar_list) %in% iter_varnames
         # List of the types of the variables included
         type_list = cfg$variables$variable_types[iter_ptr]
         # List of the scaling factors for the variables included
@@ -84,7 +87,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
         
         for (wgt_row in 1:nrow(wgt_list)){
           iter_wgt = wgt_list[wgt_row,]
-          var_list = mapply('*', iter_wgt * iter_sf, in_data$allvar_list[iter_ptr], SIMPLIFY = F)
+          var_list = mapply('*', iter_wgt * iter_sf, allvar_list[iter_ptr], SIMPLIFY = F)
           
           # Result file suffix for weight loop
           iter_wgt_prt = paste0('_wgts_', paste(iter_wgt, collapse = '-'))
@@ -97,20 +100,20 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
             iter_tradeoff_prt = paste0('_tradeofflim_', iter_tradeoff)
             if (cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios){
               # Substituting total available area in sr_targets for iter_target
-              in_data$sr_targets$total[nrow(in_data$sr_targets)] = iter_cfg_targets
+              sr_targets$total[nrow(sr_targets)] = iter_cfg_targets
               # Resizing targets per sub-region using the iteration's iter_tradeoff
-              iter_targets_tradeoff = in_data$sr_targets$total * iter_tradeoff
+              iter_targets_tradeoff = sr_targets$total * iter_tradeoff
               # For sub-regions, the problem matrix is given by sr_coefs
-              problem_matrix = in_data$sr_coefs * in_data$px_area
+              problem_matrix = sr_coefs * px_area
             } else { #that is, include subregion flag in the config json is false
               iter_targets_tradeoff = iter_cfg_targets * iter_tradeoff
               # in this case, the problem matrix is trivial
-              #problem_matrix = matrix(rep(1, length(in_data$master_index)), nrow=1)
-              problem_matrix = matrix(in_data$px_area, nrow=1)
+              #problem_matrix = matrix(rep(1, length(master_index)), nrow=1)
+              problem_matrix = matrix(px_area, nrow=1)
             }
             
             # Resets object storing the cumulative area restored in each refresh-step
-            iter_res_cum = rep(0, length(in_data$master_index))
+            iter_res_cum = rep(0, length(master_index))
             
             for (iter_refresh_lim in iter_refresh_points){
               # Actual target to be sent to the solver, resized to a refresh-step
@@ -125,6 +128,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
               if (verbose){print(iter_filename)}
               
               iter_start = Sys.time()
+              
               iter_res = plangea_process_solver(obj = iter_obj,
                                                 mat = problem_matrix,
                                                 rhs = iter_targets,
@@ -143,8 +147,8 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
               iter_res_cum = iter_res_cum + iter_res
 
               #if (verbose){#print(hist(iter_res[iter_res>0]))
-                #print(sum(iter_res * in_data$px_area))
-                #print(spplot_vals(iter_res_cum, base_ras = bg, in_data$master_index))
+                #print(sum(iter_res * px_area))
+                #print(spplot_vals(iter_res_cum, base_ras = bg, master_index))
                 #}
                             
               # Refreshes variables (if the iteration's scenario have refresh steps)
