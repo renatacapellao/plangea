@@ -28,6 +28,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                 force_comp = force_comp)
   
   lu_vals = lu_res$lu_vals
+  lu_terr = lu_res$lu_terr
   master_index = lu_res$master_index
   terrestrial_index = lu_res$terrestrial_index
   ub_vals = lu_res$ub_vals
@@ -52,8 +53,6 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   harmonize_log = ready_res$harmonize_log
   update_flag = ready_res$update_flag
   rm(ready_res)
-
-
 
   
   # Sub-module: opportunity cost -----------------------------------------------
@@ -98,6 +97,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                           flag_log = update_flag,
                                           master_index = master_index,
                                           ub_vals = ub_vals,
+                                          px_area = px_area,
                                           verbose = verbose, 
                                           force_comp = force_comp)
     
@@ -109,23 +109,33 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
     update_flag = sr_res$update_flag
     rm(sr_res)    
   }
-
+  
+  
+  # Sub-module: include refreshable variables into allvar_list -----------------
+  # (plangea_refresh_vars script is sourced at the wrapper level)
+  
+  allvar_list = plangea_refresh_vars(cfg, upper_env = mget(objects()),
+                                     verbose = verbose)
   
   
   # Sub-module: biodiversity ---------------------------------------------------
   source('plangea_harmonize_bd.R')
   
   bd_res = plangea_harmonize_bd(cfg, file_log = harmonize_log,
-                                flag_log = update_flag, lu_vals = lu_vals,
-                                master_index = master_index, oa_vals = oa_vals,
+                                flag_log = update_flag, lu_terr = lu_terr,
+                                master_index = master_index,
+                                terrestrial_index = terrestrial_index,
+                                oa_vals = oa_vals,
                                 verbose = verbose,
                                 force_comp = force_comp)
 
   bd = bd_res$bd
+  usphab_proc = bd_res$usphab_proc
   usphab_index = bd_res$usphab_index 
   species_index_list_proc = bd_res$species_index_list_proc
   hab_now_areas = bd_res$hab_now_areas
   hab_pot_areas = bd_res$hab_pot_areas
+  prop_restore = bd_res$prop_restore
   harmonize_log = bd_res$harmonize_log
   update_flag = bd_res$update_flag
   rm(bd_res)
@@ -138,6 +148,6 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   
   # Saving rdss and returning ------------------------------------------------
   harmonize_res = mget(objects())
-  pigz_save(harmonize_res, file='harmonize_full_envir')
+  pigz_save(harmonize_res, file=paste0(in_dir, 'harmonize_full_envir'))
   return(harmonize_res)
 }

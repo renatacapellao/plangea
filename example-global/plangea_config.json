@@ -1,6 +1,6 @@
 {
 	"io": {
-	  "base_path": "~/Documents/IIS_PROJECTS/plangea/",
+	  "base_path": "~/Documents/IIS_PROJECTS/plangea/example-global/",
 		"rawdata_path": "rawdata/",
 		"lu_path": "land-use/",
 		"past_lu_path": "past/",
@@ -8,20 +8,29 @@
 		"variables_path": "variables/",
 		"species_path": "species/placeholder_for_dev/",
 		"processed_path": "processed/",
-		"output_path": "results/"
+		"output_path": "results/",
+		"solver_results_path": "solver_runs/",
+		"post_processed_path": "post_processed/"
 	},
 
 	"variables": {
-		"variable_names": ["cb", "bd", "oc"],   
-		"variable_types": ["B", "B", "C"],  
-		"variable_weights": [1, [1, 10, 100, 1000], 1],
-		"variable_scaling_factor": [1e-3, 1e2, 1e-4],
-		"ready_variables": [true, true, false],  
+		"variable_names": ["cb", "bd", "oc", "ph"],   
+		"variable_types": ["B", "B", "C", "B"],  
+		"variable_weights": [1, [1, 10, 100, 1000], 1, [0.5, 1, 2]],
+		"variable_scaling_factor": ["", "", "", 1],
+		"ready_variables": [true, false, false, false],  
 		"ready_variables_raster_names": [
 		  "DELTA_C_BiomassSoil30cm_v12.1.tif",
-		  "opportunity_costs_cropland_4.9km_Molweide.tif",
+		  "",
+		  "",
 		  ""
 		  ],
+		"refresh_variables_script_names":[
+		  "",
+		  "",
+		  "",
+		  "calc_placeholder.R"
+		],
 		"calc_oc": {
 		  "oc_variable_name": "oc",
 		  "oc_names": ["occ", "ocg"],
@@ -80,26 +89,26 @@
 	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_wetland.tif"
 	    ]
 	  },
-	  "area_scaling_factor": 1e-4
+	  "area_scaling_factor": "1e4"
 	},
 
 	"scenarios": {
 		"problem_type": "R", 
-		"benchmark_scenarios": ["cb", "bd", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
+		"benchmark_scenarios": ["bd", "cb", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
 		"refresh_nsteps_per_benchmark": [1, 10, 1, 10, 1, 10, 10],
-		"target_names": ["BONN", "NYDC", "CTRY", "CBD", "CBD2", "WRLD"],
-		"targets": ["1.5e6", "3.5e6", "13.3719e6", "12.7e6", "25.4e6", ""],
-		"tradeoff_curve_percent_step_size": 0.05,
+		"target_names": ["WRLD", "CBD"],
+		"target_areas_sqkm": ["", "4.3056e6"],
+		"tradeoff_curve_percent_step_size": 0.15,
 		"tradeoff_curve_percent_nstep_range": [1, 20],
 		"sub-region_scenarios": {
-			"include_subregion_scenarios": true,
+			"include_subregion_scenarios": false,
 			"sub-region_folder": "subregions/",
 			"sub-region_raster_name": "countries-code.tif",
 			"sub-region_names_table": "countries-code.csv",
 			"sub-region_flat_targets": false,
 			"sub-region_flat_targets_limits": 1,
-			"sub-region_targets": "restoration-constraints-per-country-total.csv" 
+			"sub-region_target_areas_sqkm": "restoration-constraints-per-country-total.csv" 
 		},
-		"upper_bounds_limits": [0.33, 0.67, 1]
+		"upper_bounds_limits": [1]
 		}
 }

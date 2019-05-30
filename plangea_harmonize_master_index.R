@@ -46,7 +46,10 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
     overall_area = sum(ub_vals)
     
     # Computing pixel area
-    px_area = area(lu_ras[[1]])[master_index]
+    # (for some strange reason area is returning a value compatible with
+    # m2 units, instead of km2 units as stated in the command's help. 
+    # Thus, a conversion to km2 is applied here, to conform with units in help.
+    px_area = area(lu_ras[[1]])[master_index] * 1e-6
     
     mi_aux = list(ub_vals = ub_vals, overall_area = overall_area,
                   px_area = px_area)
@@ -61,7 +64,7 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
     overall_area = mi_aux$overall_area
     px_area = mi_aux$px_area
 }
-  return(list(master_index = master_index,
+  return(list(master_index = master_index, px_area = px_area,
               ub_vals = ub_vals, overall_area = overall_area,
               file_log = file_log, flag_log = flag_log))
 }
