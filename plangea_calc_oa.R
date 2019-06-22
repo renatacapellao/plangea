@@ -5,7 +5,7 @@ plangea_calc_oa =  function(c_lu_maps, er_maps=NULL, p_lu_maps=NULL, lu_types, t
   #  "N" for natural, "A" for anthropic, "I" for ignore
   
   # If past LU is not available, assume past distribution is the same as current one
-  if (is.null(p_lu_maps)){p_lu_maps = c_lu_maps[lu_types == "N"]}
+  if (is.null(p_lu_maps)){ p_lu_maps = c_lu_maps[lu_types == "N"] }
   
   # If Ecoregions is not available, assume past distribution was flat among natural types
   if (is.null(er_maps)){
@@ -25,7 +25,7 @@ plangea_calc_oa =  function(c_lu_maps, er_maps=NULL, p_lu_maps=NULL, lu_types, t
   p_nat_maps = lapply(p_lu_maps, function(x){x / Reduce('+', p_lu_maps)})
 
   # Correcting proportions of past natural areas in pixels where corr_cond is verified
-  for (i in 1:length(p_nat_maps)){p_nat_maps[[i]][corr_cond] = er_maps[[i]][corr_cond]}
+  for (i in 1:length(p_nat_maps)){ p_nat_maps[[i]][corr_cond] = er_maps[[i]][corr_cond] }
     
   # Proportion of current anthropic area converted on each natural type
   c_conv_map = lapply(p_nat_maps, function(x){x * c_anth_map})
@@ -36,12 +36,11 @@ plangea_calc_oa =  function(c_lu_maps, er_maps=NULL, p_lu_maps=NULL, lu_types, t
   # Checking that original areas sum to 1 within given tolerance  
   check_oa = Reduce('+', c(oa_maps, list(Reduce('+', c_lu_maps[lu_types=='I']))))
   n_problems = length(which((check_oa -1) > tolerance))
-  if(n_problems > 0){warning(paste0('OA was computed with ', n_problems,' inconsistencies'))}
+  if (n_problems > 0){ warning(paste0('OA was computed with ', n_problems,' inconsistencies')) }
   
   # Checking that original areas have no NA
   na_problem = lapply(oa_maps, function(x){length(which(is.na(x)))} != 0)
-  
-  #if (na_problem){print('a')}
+  if (na_problem){ stop('Original Areas (OA) have NA.') }
   
   return(oa_maps)
 }
