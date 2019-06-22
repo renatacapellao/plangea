@@ -13,7 +13,7 @@ plangea_harmonize_add_ready = function(cfg, file_log, flag_log, master_index,
   # Stores info on files to be used
   present_var_info = file.info(dir(var_dir, full.names = T)[dir(var_dir) %in% var_ready_names], extra_cols = F)
   
-  if (is.null(file_log$ready_var)){file_log$ready_var = present_var_info}
+  if (is.null(file_log$ready_var)){ file_log$ready_var = present_var_info }
   
   # Update checks
   nfiles_check = (nrow(present_var_info) != nrow(file_log$ready_var))      # number of files is not the same
@@ -42,7 +42,7 @@ plangea_harmonize_add_ready = function(cfg, file_log, flag_log, master_index,
     
     pigz_save(var_vals, file = paste0(in_dir, 'var_vals'))
   } else {
-    if (verbose) {cat('Loading ready-variables-values data \n')}
+    if (verbose) { cat('Loading ready-variables-values data \n') }
     var_vals = pigz_load(file = paste0(in_dir, 'var_vals'))
   }
   

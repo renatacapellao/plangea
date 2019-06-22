@@ -27,7 +27,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
   g_scalar_area = as.numeric(cfg$landscape_features$area_scaling_factor)
   
   # Filling up g_scalar_area if value is missing in config json
-  if(is.na(g_scalar_area)){g_scalar_area = (10^(3.5)) / max(unlist(targets))}
+  if(is.na(g_scalar_area)){ g_scalar_area = (10^(3.5)) / max(unlist(targets)) }
   
   
   # Trade-off limits -----------------------------------------------------------
@@ -122,7 +122,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
               # Name to save the resulting file for the solver call of the iteration
               iter_filename = paste0(iter_target_name, iter_ublim_prt, iter_scen_prt,
                            iter_wgt_prt, iter_tradeoff_prt, iter_refresh_prt)
-              if (verbose){print(iter_filename)}
+              if (verbose){ print(iter_filename) }
               
               iter_start = Sys.time()
               iter_res = plangea_process_solver(obj = iter_obj,

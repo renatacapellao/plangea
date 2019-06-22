@@ -15,10 +15,10 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
   flag_log$bd = F
   
   # Stores info on files to be used
-  present_bd_info =   lapply(cfg$variables$calc_bd$bd_subfolders,
-                             function(x){file.info(dir(paste0(spp_dir,x), full.names = T))})
+  present_bd_info =  lapply(cfg$variables$calc_bd$bd_subfolders,
+                            function(x){file.info(dir(paste0(spp_dir,x), full.names = T))})
   
-  if (is.null(file_log$bd)){file_log$bd = present_bd_info}
+  if (is.null(file_log$bd)){ file_log$bd = present_bd_info }
   
   # Update checks
   # number of files is not the same
@@ -160,7 +160,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     pigz_save(bd_aux, file = paste0(in_dir, 'bd_aux'))
         
   } else {
-    if (verbose) {cat('Loading biodiversity data \n')}
+    if (verbose) { cat('Loading biodiversity data \n') }
     bd_aux = pigz_load(paste0(in_dir, 'bd_aux'))
     bd = bd_aux$bd
     usphab_index = bd_aux$usphab_index 

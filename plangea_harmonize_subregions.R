@@ -7,7 +7,7 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
   # Stores info on files to be used
   present_sr_info = file.info(dir(sr_dir, full.names = T)[dir(sr_dir) %in% cfg$scenarios$`sub-region_scenarios`$`sub-region_raster_name`], extra_cols = F)
   
-  if (is.null(file_log$sr)){file_log$sr = present_sr_info}
+  if (is.null(file_log$sr)){ file_log$sr = present_sr_info }
   
   # Update checks
   nfiles_check = (nrow(present_sr_info) != nrow(file_log$sr))         # number of files is not the same
@@ -64,7 +64,7 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
     pigz_save(sr_aux, file = paste0(in_dir, 'sr_aux'))
     
   } else {
-      if (verbose) {cat('Loading sub-regions data \n')}
+      if (verbose) { cat('Loading sub-regions data \n') }
       sr_aux = pigz_load(paste0(in_dir, 'sr_aux'))
       sr_vals = sr_aux$sr_vals
       sr_tbl = sr_aux$sr_tbl

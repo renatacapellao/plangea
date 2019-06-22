@@ -6,7 +6,7 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
   # Stores info on files to be used
   present_lu_info = file.info(dir(lu_dir, full.names = T)[dir(lu_dir) %in% cfg$landscape_features$land_use$classes_raster_names], extra_cols = F)
   
-  if (is.null(file_log$lu)){file_log$lu = present_lu_info}
+  if (is.null(file_log$lu)){ file_log$lu = present_lu_info }
   
   # Update checks
   nfiles_check = (nrow(present_lu_info) != nrow(file_log$lu))         # number of files is not the same
@@ -80,13 +80,13 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
     pigz_save(lu_vals, file = paste0(in_dir, 'lu_vals'))
     
   } else { # else related to updated land-use rasters
-    if (verbose) {cat('Loading auxiliary land-use data \n')}
+    if (verbose) { cat('Loading auxiliary land-use data \n') }
     lu_aux = pigz_load(paste0(in_dir, 'lu_aux'))
     lu_terr = lu_aux$lu_terr
     terrestrial_index = lu_aux$terrestrial_index
     lu_class_types = lu_aux$lu_class_types
     # Loads land-use rasters (even if they didn't change, the master_index did)
-    if (verbose) {cat('Loading land-use-raster data \n')}
+    if (verbose) { cat('Loading land-use-raster data \n') }
     lu_ras = pigz_load(paste0(in_dir, 'lu_ras'))
     
     source('plangea_harmonize_master_index.R')
@@ -109,7 +109,7 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
       lu_vals = lapply(lu_ras, function(x){x[master_index]})
       pigz_save(lu_vals, file = paste0(in_dir, 'lu_vals'))
     } else {
-      if (verbose) {cat('Loading land-use-values data \n')}
+      if (verbose) { cat('Loading land-use-values data \n') }
       lu_vals = pigz_load(paste0(in_dir, 'lu_vals'))
       } # end else related to updated master_index or unavailable lu_vals
   } # end else related to updated land-use rasters

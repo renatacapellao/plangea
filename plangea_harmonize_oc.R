@@ -7,7 +7,7 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
   # Stores info on files to be used
   present_oc_info = file.info(dir(var_dir, full.names = T)[dir(var_dir) %in% cfg$variables$calc_oc$oc_files], extra_cols = F)
   
-  if (is.null(file_log$oc)){file_log$oc = present_oc_info}
+  if (is.null(file_log$oc)){ file_log$oc = present_oc_info }
   
   # Update checks
   nfiles_check = (nrow(present_oc_info) != nrow(file_log$oc))         # number of files is not the same
@@ -48,7 +48,7 @@ plangea_harmonize_oc = function(cfg, file_log, flag_log, master_index, lu_val_li
     
     pigz_save(oc, file = paste0(in_dir, 'oc'))
   } else {
-    if (verbose) {cat('Loading opportunity-cost data \n')}
+    if (verbose) { cat('Loading opportunity-cost data \n') }
     oc = pigz_load(paste0(in_dir, 'oc'))
   }
   

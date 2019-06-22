@@ -40,7 +40,6 @@ plangea_calc_oa =  function(c_lu_maps, er_maps=NULL, p_lu_maps=NULL, lu_types, t
   
   # Checking that original areas have no NA
   na_problem = lapply(oa_maps, function(x){length(which(is.na(x)))} != 0)
-
   if (na_problem){ stop('Original Areas (OA) have NA.') }
   
   return(oa_maps)

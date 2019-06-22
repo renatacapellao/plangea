@@ -57,7 +57,7 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
     pigz_save(master_index, file = paste0(in_dir, 'master_index'))  
     pigz_save(mi_aux, file = paste0(in_dir, 'mi_aux'))
   } else {
-    if (verbose) {cat('Loading master index data \n')}
+    if (verbose) { cat('Loading master index data \n') }
     master_index = pigz_load(paste0(in_dir, 'master_index'))
     mi_aux = pigz_load(paste0(in_dir, 'mi_aux'))
     ub_vals = mi_aux$ub_vals
