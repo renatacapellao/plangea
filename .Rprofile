@@ -1,3 +1,4 @@
-message("Welcome to Plangea - version: 0.1.0")
-options(prompt = "Plangea > ")
 Sys.setenv(OS = .Platform$OS.type)
+Sys.setenv(PLANGEA_VERSION = "0.1.0")
+message(paste0("Welcome to Plangea - version: ", Sys.getenv("PLANGEA_VERSION")))
+options(prompt = paste0("Plangea > "))
