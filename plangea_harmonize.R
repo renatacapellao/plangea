@@ -1,125 +1,153 @@
 
-plangea_harmonize = function(cfg){
-  # Land-use ---------------------------------------------------------
-  # Load land-use rasters names
-  lu_ras_names = dir(lu_dir)[dir(lu_dir) %in% cfg$landscape_features$land_use$classes_raster_names]
+plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = F){
   
-  # Re-ordering to ensure the object created follows order in config file
-  lu_ras_names = lu_ras_names[match(cfg$landscape_features$land_use$classes_raster_names, lu_ras_names)]
+  # Initiating structures for controling changes -------------------------------
   
-  # Creating raster stack with rasters corresponding to LU names
-  #lu_ras = stack(paste0(lu_dir, lu_ras_names))
-  lu_ras = lapply(paste0(lu_dir, lu_ras_names), function(x){load_raster(x)})
-  names(lu_ras) = cfg$landscape_features$land_use$class_names
+  # Creating / Loading harmonize_log: stores info on files loaded by the script
+  if (file.exists(paste0(in_dir, 'harmonize_log'))){
+    harmonize_log = pigz_load(paste0(in_dir, 'harmonize_log'))
+  } else {
+      harmonize_log = list(start = cfg)
+      pigz_save(harmonize_log, file = (paste0(in_dir, 'harmonize_log')))
+    }
+  
+  # Creating update_flag: stores info on which sub-modules actively computed their result
+  update_flag = data.frame(start=T)
+  
+  # Reading backup config file
+  #if(file.exists(paste0(in_dir, 'cfg_bk'))){
+  #  cfg_bk = pigz_load(paste0(in_dir, 'cfg_bk'))
+  #  } else {cfg_bk = rapply(cfg, function(x){''}, how = "replace")}
+  
+  
+  # Sub-module: Land-use / Terrestrial Index -----------------------------------
+  source('plangea_harmonize_lu.R')
+  
+  lu_res = plangea_harmonize_lu(cfg, file_log=harmonize_log, flag_log=update_flag,
+                                verbose = verbose,
+                                force_comp = force_comp)
+  
+  lu_vals = lu_res$lu_vals
+  lu_terr = lu_res$lu_terr
+  master_index = lu_res$master_index
+  terrestrial_index = lu_res$terrestrial_index
+  ub_vals = lu_res$ub_vals
+  overall_area = lu_res$overall_area
+  lu_class_types = lu_res$lu_class_types
+  px_area = lu_res$px_area
+  harmonize_log = lu_res$harmonize_log
+  update_flag = lu_res$update_flag
+  rm(lu_res)
+  
 
-  # Load land-use class types
-  # Possible types of LU: "N"atural, "A"nthropic, "I"gnore
-  lu_class_types = cfg$landscape_features$land_use$class_types  
+  # Sub-module: include ready variables into allvar_list -----------------------
+  source('plangea_harmonize_add_ready.R')
 
-  # Building raster with terrestrial areas
-  terrestrial_areas = Reduce('+', lu_ras[lu_class_types %in% c("N", "A")])
-  
-  # Builds index with terrestrial pixels
-  terrestrial_index = which(values(terrestrial_areas > 0))
-  
-  # Master Index ---------------------------------------------------------
-  # Loading type of optimisation problem
-  # Possible types of optimisation: "C"onservation, "R"estoration
-  optim_type = cfg$scenarios$problem_type
-  
-  # Building list relating type of LU to type of optimisation
-  lu_to_optim = lu_class_types
-  lu_to_optim[lu_to_optim == 'N'] = 'C'
-  lu_to_optim[lu_to_optim == 'A'] = 'R'
-  
-  # Builds raster of interest areas
-  interest_areas = Reduce('+', lu_ras[lu_to_optim %in% optim_type])
-  
-  # Building master_index of pixels of interest
-  master_index = which(values(interest_areas > 0))
-  
-  # Creating list with raster values corresponding to the master_index
-  lu_vals = lapply(lu_ras, function(x){x[master_index]})
-  
-  # Loading ready variables
-  var_ras_names = cfg$variables$variable_raster_names
-  
-#<<<<<<< HEAD
-  var_vals = lapply(paste0(var_dir, var_ras_names[cfg$variables$ready_variables]),
-                    function(x){load_raster(x, master_index)})
-  names(var_vals) = cfg$variables$variable_names[cfg$variables$ready_variables]
-  
-  
-  # All-variables list -------------------------------------------------------
-  # Build list of all variables
-  allvar_list = as_list(cfg$variables$variable_names)
-  names(allvar_list) = allvar_list
-  
-  # Include in allvar list the variables already loaded
-  allvar_list[names(allvar_list) %in% names(var_vals)] = var_vals
-  
-  
-  # Opportunity cost ---------------------------------------------------------
-  # Computing opportunity costs, if: (a) oc is not labeled as ready in
-  # $ready_variables, and if (b) the required rasters are in the right folder
-  if (!cfg$variables$ready_variables[cfg$variables$variable_names %in%
-                                     (cfg$variables$calc_oc$oc_variable_name)] & # condition (a)
-      (length(which(dir(var_dir) %in% cfg$variables$calc_oc$oc_files)) ==
-      length(cfg$variables$calc_oc$oc_names))){ # condition (b)
-    
-    source('plangea_calc_oc.R')
-    
-    # Including opportunity cost into allvar_list
-    allvar_list[names(allvar_list) %in% cfg$variables$calc_oc$oc_variable_name]=
-      list(plangea_calc_oc(cfg, lu_val_list=lu_vals, master_index=master_index))
-    
-  } # end of calc_oc if statement
+  ready_res = plangea_harmonize_add_ready(cfg, file_log = harmonize_log,
+                                         flag_log = update_flag, 
+                                         master_index = master_index,
+                                         verbose = verbose,
+                                         force_comp = force_comp)
+
+  allvar_list = ready_res$allvar_list
+  harmonize_log = ready_res$harmonize_log
+  update_flag = ready_res$update_flag
+  rm(ready_res)
 
   
-  # Ecoregions maps ------------------------------------------------------------
-  # Load land-use rasters names
-  er_ras_names = dir(er_dir)[dir(er_dir) %in% cfg$landscape_features$original_areas$ecoregions_raster_names]
+  # Sub-module: opportunity cost -----------------------------------------------
+  source('plangea_harmonize_oc.R')
+    
+  oc_res = plangea_harmonize_oc(cfg, file_log = harmonize_log,
+                                flag_log = update_flag,
+                                master_index = master_index,
+                                lu_val_list = lu_vals,
+                                verbose = verbose,
+                                force_comp = force_comp)
   
-  # Re-ordering to ensure the object created follows order in config file
-  er_ras_names = er_ras_names[match(cfg$landscape_features$original_areas$ecoregions_raster_names, er_ras_names)]
+  oc = oc_res$oc
+  harmonize_log = oc_res$harmonize_log
+  update_flag = oc_res$update_flag
+  rm(oc_res)
+
+  allvar_list[names(allvar_list) %in% cfg$variables$calc_oc$oc_variable_name] = list(oc)
+    
+
+  # Sub-module: original areas (OA) --------------------------------------------
+  source('plangea_harmonize_oa.R')
+    
+  oa_res = plangea_harmonize_oa(cfg, file_log = harmonize_log,
+                                master_index = master_index,
+                                flag_log = update_flag, c_lu_maps = lu_vals,
+                                lu_types = lu_class_types, tolerance=1.e-7,
+                                verbose = verbose,
+                                force_comp = force_comp)
   
-  # Ecoregion maps required to deal with areas without natural-area remnants
-  er_maps = lapply(paste0(er_dir, er_ras_names), function(x){load_raster(x, master_index)})
-  names(er_maps) = cfg$landscape_features$original_areas$past_class_names
+  oa_vals = oa_res$oa_vals
+  harmonize_log = oa_res$harmonize_log
+  update_flag = oa_res$update_flag
+  rm(oa_res)
+    
   
-  
-  # Original areas (OA) ---------------------------------------------------------
-  past_lu_vals = NULL
-  
-  if (cfg$landscape_features$original_areas$include_past){
-    past_names = cfg$landscape_features$original_areas$past_raster_names
-    past_lu_vals = lapply(paste0(past_lu_dir, past_names), function(x){load_raster(x, master_index)})
-    names(past_lu_vals) = cfg$landscape_features$original_areas$past_class_names
+  # Sub-module: sub-regions ----------------------------------------------------
+  if (cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios){
+    source('plangea_harmonize_subregions.R')    
+    
+    sr_res = plangea_harmonize_subregions(cfg, file_log = harmonize_log,
+                                          flag_log = update_flag,
+                                          master_index = master_index,
+                                          ub_vals = ub_vals,
+                                          px_area = px_area,
+                                          verbose = verbose, 
+                                          force_comp = force_comp)
+    
+    sr_vals = sr_res$sr_vals
+    sr_tbl = sr_res$sr_tbl
+    sr_coefs = sr_res$sr_coefs
+    sr_targets = sr_res$sr_targets
+    harmonize_log = sr_res$harmonize_log
+    update_flag = sr_res$update_flag
+    rm(sr_res)    
   }
   
-  source('plangea_calc_oa.R')
-    
-  oa_vals = plangea_calc_oa(c_lu_maps = lu_vals, er_maps = er_maps,
-                            p_lu_maps = past_lu_vals, lu_type = lu_class_types,
-                            tolerance=1.e-7)
-    
+  
+  # Sub-module: include refreshable variables into allvar_list -----------------
+  # (plangea_refresh_vars script is sourced at the wrapper level)
+  
+  allvar_list = plangea_refresh_vars(cfg, upper_env = mget(objects()),
+                                     verbose = verbose)
+  
+  
+  # Sub-module: biodiversity ---------------------------------------------------
+  source('plangea_harmonize_bd.R')
+  
+  bd_res = plangea_harmonize_bd(cfg, file_log = harmonize_log,
+                                flag_log = update_flag, lu_terr = lu_terr,
+                                master_index = master_index,
+                                terrestrial_index = terrestrial_index,
+                                oa_vals = oa_vals,
+                                verbose = verbose,
+                                force_comp = force_comp)
 
-  # Biodiversity ---------------------------------------------------------
-  
-  source('plangea_calc_bd.R')
-  
-  bd = plangea_calc_bd(cfg = cfg, lu_vals = lu_vals,
-                       master_index = master_index, oa_vals = oa_vals)
-  
-  # Including biodiversity benefits into allvar_list
+  bd = bd_res$bd
+  usphab_proc = bd_res$usphab_proc
+  usphab_index = bd_res$usphab_index 
+  species_index_list_proc = bd_res$species_index_list_proc
+  hab_now_areas = bd_res$hab_now_areas
+  hab_pot_areas = bd_res$hab_pot_areas
+  prop_restore = bd_res$prop_restore
+  harmonize_log = bd_res$harmonize_log
+  update_flag = bd_res$update_flag
+  rm(bd_res)
+
   allvar_list[names(allvar_list) %in% cfg$variables$calc_bd$bd_variable_name] = list(bd)
 
-  return(allvar_list)
-    
-#=======
-  # List _Rdata files saved in dir
-  #obj_list = dir(dir, full_names=T, pattern='_Rdata', ignore_case=T)
-  # Loads all objects with names in obj_list
-#>>>>>>> 82f05d12db99c7fed4f34e3018ec5959b097fe1f
+  # Updating harmonize log with cfg used in this run
+  harmonize_log$start = cfg
+  pigz_save(harmonize_log, file=paste0(in_dir, 'harmonize_log'))
   
-} # end of plangea_harmonize function
+  # Saving rdss and returning ------------------------------------------------
+  harmonize_res = mget(objects())
+  pigz_save(harmonize_res, file=paste0(in_dir, 'harmonize_full_envir'))
+  return(harmonize_res)
+}

@@ -1,9 +1,16 @@
-plangea_calc_oa =  function(c_lu_maps, er_maps, p_lu_maps=NULL, lu_types, tolerance=1.e-7){
+plangea_calc_oa =  function(c_lu_maps, er_maps=NULL, p_lu_maps=NULL, lu_types, tolerance=1.e-7){
   # c_lu_maps: current land-use list of rasters or indexed vectors
   # p_lu_maps: past land-use list of rasters or indexed vectors of "N" types only
   # lu_types: for each lu in the maps above, a single letter:
   #  "N" for natural, "A" for anthropic, "I" for ignore
-  if (is_null(p_lu_maps)){ p_lu_maps = c_lu_maps[lu_types == "N"] }
+  
+  # If past LU is not available, assume past distribution is the same as current one
+  if (is.null(p_lu_maps)){ p_lu_maps = c_lu_maps[lu_types == "N"] }
+  
+  # If Ecoregions is not available, assume past distribution was flat among natural types
+  if (is.null(er_maps)){
+    er_maps = lapply(c_lu_maps[lu_types == "N"],
+                     function(x){Reduce('+', c_lu_maps[lu_types == "N"]) / length(which(lu_types == "N"))})
   
   # Making sure p_lu_maps are ordered the same way as c_lu_maps[lu_types=="N"]
   p_lu_maps = p_lu_maps[match(names(c_lu_maps)[lu_types=="N"], names(p_lu_maps))]
@@ -33,7 +40,8 @@ plangea_calc_oa =  function(c_lu_maps, er_maps, p_lu_maps=NULL, lu_types, tolera
   
   # Checking that original areas have no NA
   na_problem = lapply(oa_maps, function(x){length(which(is.na(x)))} != 0)
-  if (na_problem) { stop('Original Areas have NA!') }
+
+  if (na_problem){ stop('Original Areas (OA) have NA.') }
   
   return(oa_maps)
 }
