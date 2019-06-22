@@ -4,7 +4,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   # Initiating structures for controling changes -------------------------------
   
   # Creating / Loading harmonize_log: stores info on files loaded by the script
-  if (file.exists(paste0(in_dir, 'harmonize_log'))){
+  if (file.exists(paste0(in_dir, 'harmonize_log'))) {
     harmonize_log = pigz_load(paste0(in_dir, 'harmonize_log'))
   } else {
       harmonize_log = list(start = cfg)
@@ -90,7 +90,7 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
     
   
   # Sub-module: sub-regions ----------------------------------------------------
-  if (cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios){
+  if (cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios) {
     source('plangea_harmonize_subregions.R')    
     
     sr_res = plangea_harmonize_subregions(cfg, file_log = harmonize_log,

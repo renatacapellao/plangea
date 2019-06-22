@@ -12,7 +12,7 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
   # Stores info on files to be used
   current_past_lu_info = file.info(dir(past_lu_dir, full.names = T)[dir(past_lu_dir) %in% cfg$landscape_features$original_areas$past_raster_names], extra_cols = F)
   
-  if (is.null(file_log$past_lu)){ file_log$past_lu = current_past_lu_info }
+  if (is.null(file_log$past_lu)) {file_log$past_lu = current_past_lu_info}
   
   # Update checks
   nfiles_check = (nrow(current_past_lu_info) != nrow(file_log$past_lu))         # number of files is not the same
@@ -24,7 +24,7 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
   # Adding / updating 'past lu' data to file_log (must be done *after* checks)
   file_log$past_lu = current_past_lu_info  
   
-  if ((nfiles_check | ctimes_check | rds_check | dependencies | force_comp) & (config_check)){
+  if ((nfiles_check | ctimes_check | rds_check | dependencies | force_comp) & (config_check)) {
     # Modifies control structures to indicate lu_res will be computed
     flag_log$oa = T
     
@@ -44,7 +44,7 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     names(p_lu_maps) = cfg$landscape_features$original_areas$past_class_names
     pigz_save(p_lu_maps, file = paste0(in_dir, 'past_lu'))
   } else {
-    if (config_check){
+    if (config_check) {
       if (verbose) {cat('Loading past-land-use data \n')}
       p_lu_maps = pigz_load(paste0(in_dir, 'past_lu'))}
     else {
@@ -59,7 +59,7 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
   # Stores info on files to be used
   current_er_info = file.info(dir(er_dir, full.names = T)[dir(er_dir) %in% cfg$landscape_features$original_areas$ecoregions_raster_names], extra_cols = F)
   
-  if (is.null(file_log$er)){file_log$er = current_er_info}
+  if (is.null(file_log$er)) {file_log$er = current_er_info}
   
   # Update checks
   nfiles_check = (nrow(current_er_info) != nrow(file_log$er))         # number of files is not the same
@@ -71,7 +71,7 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
   # Adding / updating 'ER' data to file_log (must be done *after* checks)
   file_log$er = current_er_info  
   
-  if ((nfiles_check | ctimes_check | rds_check | dependencies | force_comp) & (config_check)){
+  if ((nfiles_check | ctimes_check | rds_check | dependencies | force_comp) & (config_check)) {
     # Modifies control structures to indicate lu_res will be computed
     flag_log$oa = T
     
@@ -97,10 +97,10 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     names(er_maps) = cfg$landscape_features$original_areas$past_class_names   
     pigz_save(er_maps, file = paste0(in_dir, 'er'))
   } else {
-    if (config_check){
-      if (verbose) { cat('Loading ecoregions data \n') }
-      er_maps = pigz_load(file = paste0(in_dir, 'er'))}
-    else {
+    if (config_check) {
+      if (verbose) {cat('Loading ecoregions data \n')}
+      er_maps = pigz_load(file = paste0(in_dir, 'er'))
+    } else {
       er_maps = lapply(c_lu_maps[lu_types == "N"],
                        function(x){Reduce('+', c_lu_maps[lu_types == "N"]) / length(which(lu_types == "N"))})
     }
@@ -108,7 +108,7 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
 
   # Original areas -------------------------------------------------------------
   
-  if ((flag_log$oa == T) | (!file.exists(paste0(in_dir, 'oa'))) ){
+  if ((flag_log$oa == T) | (!file.exists(paste0(in_dir, 'oa'))) ) {
     # Total current anthropic area in each pixel
     c_anth_map = Reduce('+', c_lu_maps[lu_types == "A"])
     
@@ -119,7 +119,7 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     p_nat_maps = lapply(p_lu_maps, function(x){x / Reduce('+', p_lu_maps)})
     
     # Correcting proportions of past natural areas in pixels where corr_cond is verified
-    for (i in 1:length(p_nat_maps)){ p_nat_maps[[i]][corr_cond] = er_maps[[i]][corr_cond] }
+    for (i in 1:length(p_nat_maps)) {p_nat_maps[[i]][corr_cond] = er_maps[[i]][corr_cond]}
     
     # Proportion of current anthropic area converted on each natural type
     c_conv_map = lapply(p_nat_maps, function(x){x * c_anth_map})
@@ -130,14 +130,14 @@ plangea_harmonize_oa =  function(cfg, file_log, flag_log, c_lu_maps, lu_types,
     # Checking that original areas sum to 1 within given tolerance  
     check_oa = Reduce('+', c(oa_maps, list(Reduce('+', c_lu_maps[lu_types=='I']))))
     n_problems = length(which((check_oa -1) > tolerance))
-    if(n_problems > 0){ warning(paste0('OA was computed with ', n_problems,' inconsistencies')) }
+    if (n_problems > 0) {warning(paste0('OA was computed with ', n_problems,' inconsistencies'))}
     
     # Checking that original areas have no NA
     na_problem = lapply(oa_maps, function(x){length(which(is.na(x)))} != 0)
     
     pigz_save(oa_maps, file = paste0(in_dir, 'oa'))
   } else {
-    if (verbose) { cat('Loading original area data \n') }
+    if (verbose) {cat('Loading original area data \n')}
     oa_maps = pigz_load (paste0(in_dir, 'oa'))}
 
   oa_res = list(oa_vals = oa_maps, er_vals = er_maps, p_lu_vals = p_lu_maps,

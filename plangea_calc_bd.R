@@ -35,7 +35,7 @@ plangea_calc_bd = function(cfg, lu_vals, master_index, oa_vals=NULL){
   
   # List of species-raster values
   spp_vals = c()
-  for (sf in cfg$variables$calc_bd$bd_subfolders){
+  for (sf in cfg$variables$calc_bd$bd_subfolders) {
     spp_vals = c(spp_vals, lapply(dir(paste0(spp_dir,sf), full.names=T),
                                 function(x){print(paste0('loading raster ', x));
                                   load_raster(x, master_index=master_index)})) }
@@ -57,7 +57,7 @@ plangea_calc_bd = function(cfg, lu_vals, master_index, oa_vals=NULL){
   usphab_index = lapply(1:nrow(usphab_proc), function(x){c()})
   
   # spid loop ----------------------------------------------------------
-  for (spid in spid_list){
+  for (spid in spid_list) {
     # Pointer in the rows of spp_table to select the iteration's spid
     spid_ptr = (spp_table[,names(spp_table) %in% cfg$variables$calc_bd$spp_table$spp_names_column] == spid)
     

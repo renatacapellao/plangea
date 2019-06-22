@@ -7,7 +7,7 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
   # Stores info on files to be used
   present_sr_info = file.info(dir(sr_dir, full.names = T)[dir(sr_dir) %in% cfg$scenarios$`sub-region_scenarios`$`sub-region_raster_name`], extra_cols = F)
   
-  if (is.null(file_log$sr)){ file_log$sr = present_sr_info }
+  if (is.null(file_log$sr)) {file_log$sr = present_sr_info}
   
   # Update checks
   nfiles_check = (nrow(present_sr_info) != nrow(file_log$sr))         # number of files is not the same
@@ -20,7 +20,7 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
   # Adding / updating 'sr' data to file_log (must be done *after* checks)
   file_log$sr = present_sr_info
   
-  if (nfiles_check | ctimes_check | rds_check | dependencies | force_comp){
+  if (nfiles_check | ctimes_check | rds_check | dependencies | force_comp) {
     # Modifies control structures to indicate sr will be computed
     flag_log$sr = T
     
@@ -50,7 +50,7 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
     sr_coefs = rbind(sr_coefs, rep(1,length(master_index)))
         
     # Sub-region-targets data.frame
-    if (cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`){
+    if (cfg$scenarios$`sub-region_scenarios`$`sub-region_flat_targets`) {
       sr_targets = rowSums(sr_coefs * ub_vals * px_area)
     } else {
       sr_targets = calc_sparable_area(read.csv(paste0(rawdata_dir,
@@ -64,7 +64,7 @@ plangea_harmonize_subregions = function(cfg, file_log, flag_log, master_index,
     pigz_save(sr_aux, file = paste0(in_dir, 'sr_aux'))
     
   } else {
-      if (verbose) { cat('Loading sub-regions data \n') }
+      if (verbose) {cat('Loading sub-regions data \n')}
       sr_aux = pigz_load(paste0(in_dir, 'sr_aux'))
       sr_vals = sr_aux$sr_vals
       sr_tbl = sr_aux$sr_tbl

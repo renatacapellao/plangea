@@ -28,8 +28,8 @@ calc_objective_function = function(var_list, type_list){
   c = Reduce('+', var_list[type_list=="C"])
   # b = Reduce('+', lapply(type_list=="B", function(x){var_list[x] * wgt_list[x]}))
   # c = Reduce('+', lapply(type_list=="C", function(x){var_list[x] * wgt_list[x]}))
-  if (is.null(b)){ b = c * (-c + abs(min(-c)) + 1) }
-  if (is.null(c)){ c=1 }
+  if (is.null(b)) {b = c * (-c + abs(min(-c)) + 1)}
+  if (is.null(c)) {c=1}
   return(b/c)
 }
 
@@ -37,7 +37,7 @@ load_raster = function(raster_path, master_index=NULL){
   res = raster(raster_path)
   res[res<0] = 0
   res[is.na(res)] = 0
-  if(!is.null(master_index)){ res = res[master_index] }
+  if (!is.null(master_index)) {res = res[master_index]}
   return(res)
 }
 
@@ -73,7 +73,7 @@ plot_vals = function(x_vals, base_ras, master_index){
 
 spplot_vals = function(x_vals, base_ras, master_index){
   #base_ras[!is.na(base_ras)] = 0
-  if(!is.list(x_vals)){x_vals = list(x_vals)}
+  if (!is.list(x_vals)) {x_vals = list(x_vals)}
   res = stack(sapply(x_vals, function(x){y=base_ras; y[master_index] = x; return(y)}))
   spplot(res)
 }
@@ -92,7 +92,7 @@ update_hab = function(hab_now_areas, restored_area, prop_restore, usphab_proc,
   
   # convert the change in habitat per pu to change in habitat per species
   delta_hab_spp = rep(0, length(id))
-  for (i in 1:length(id)){
+  for (i in 1:length(id)) {
     id_lu = usphab_proc[sapply(usphab_index, function(x){as.logical(sum(x==id[i]))}),]
     delta_hab_spp[i] = delta_hab_spp[i] + (delta_vegtype_pu %*% id_lu)
   }
@@ -104,13 +104,13 @@ update_hab = function(hab_now_areas, restored_area, prop_restore, usphab_proc,
 calc_bd = function(slp, prop_restore, usphab_proc, usphab_index,
                     species_index_list_proc, restored_area = NULL){
   bd = rep(0, nrow(prop_restore))
-  if(!is.null(restored_area)){ prop_restore = prop_restore - (restored_area/ncol(prop_restore)) }
-  for (i in 1:dim(usphab_proc)[1]){
+  if (!is.null(restored_area)) {prop_restore = prop_restore - (restored_area/ncol(prop_restore))}
+  for (i in 1:dim(usphab_proc)[1]) {
     hab_values = prop_restore %*% usphab_proc[i,]
-    if(length(usphab_index[[i]])>0){
-      for (j in 1:length(usphab_index[[i]])){
+    if (length(usphab_index[[i]])>0) {
+      for (j in 1:length(usphab_index[[i]])) {
         #print(paste(i, j, length(bd), length(bd[recs]+slp[usphab_index[[i]][j]]*hab_values[recs])))
-        if (!is.null(species_index_list_proc[[usphab_index[[i]][j]]])){
+        if (!is.null(species_index_list_proc[[usphab_index[[i]][j]]])) {
           recs = species_index_list_proc[[usphab_index[[i]][j]]]
           bd[recs] = bd[recs] + slp[usphab_index[[i]][j]] * hab_values[recs]
         }
