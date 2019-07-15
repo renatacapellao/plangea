@@ -93,7 +93,7 @@
 	"scenarios": {
 		"problem_type": "R", 
 		"benchmark_scenarios": ["cb", "bd", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
-		"refresh_nsteps_per_benchmark": [10, 10, 1, 10, 1, 10, 10],
+		"refresh_nsteps_per_benchmark": [1, 10, 1, 10, 1, 10, 10],
 		"target_names": ["WRLD", "CBD"],
 		"target_areas_sqkm": ["", "4.3056e6"],
 		"tradeoff_curve_percent_step_size": 0.15,

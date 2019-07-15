@@ -129,6 +129,8 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
               
               iter_start = Sys.time()
               
+              return(mget(objects()))
+                            
               iter_res = plangea_process_solver(obj = iter_obj,
                                                 mat = problem_matrix,
                                                 rhs = iter_targets,
@@ -137,9 +139,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
               if (verbose){cat(paste('Solver time:', round(Sys.time() - iter_start, digits=2),
                                        '| Total time elapsed:', round(Sys.time() - start_time, digits=2),
                                        '\n'))}
-              
-              #return(mget(objects()))
-              
+
               # Updates upper bounds to remove selected areas
               iter_ub = iter_ub - iter_res
               
