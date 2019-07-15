@@ -52,7 +52,7 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   #bg = lu_ras[[1]] / lu_ras[[1]]
   #bg[bg==1] = 0
   source('plangea_scenarios.R')
-  scen_list = plangea_scenarios(cfg, in_data)
+  scen_list = plangea_scenarios(cfg=cfg, in_data)
   
   
   # Post-process module --------------------------------------------------------
