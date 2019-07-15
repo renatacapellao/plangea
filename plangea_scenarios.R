@@ -30,9 +30,8 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
   g_scalar_area = as.numeric(cfg$landscape_features$area_scaling_factor)
   
   # Filling up g_scalar_area if value is missing in config json
-  if(is.na(g_scalar_area)){g_scalar_area = (10^(1.5)) / max(unlist(targets))}
-  
-  
+  if(is.na(g_scalar_area)) {g_scalar_area = (10^(3.5)) / max(unlist(targets))}
+   
   # Trade-off limits -----------------------------------------------------------
   # Limits to overall targets for trade-off curves
   tradeoff_lims = cfg$scenarios$tradeoff_curve_percent_step_size *
@@ -64,11 +63,11 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
     # Actual value for the iteration's overall target from iteration's target name
     iter_cfg_targets = as.numeric(targets[cfg$scenarios$target_names == iter_target_name])
     
-    for (iter_ublim in cfg$scenarios$upper_bounds_limits){
+    for (iter_ublim in cfg$scenarios$upper_bounds_limits) {
       # Result file suffix for ublim loop
       iter_ublim_prt = paste0('_ublim_', iter_ublim)
       
-      for (iter_scencode in 1:length(cfg$scenarios$benchmark_scenarios)){
+      for (iter_scencode in 1:length(cfg$scenarios$benchmark_scenarios)) {
         # Names of variables included in the iteration's benchmark scenario
         iter_varnames = unlist(cfg$scenarios$benchmark_scenarios[iter_scencode])
         # Result file suffix for scenarios loop
@@ -85,7 +84,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
         # List of all combinations of weights for the variables included
         wgt_list = expand.grid(cfg$variables$variable_weights[iter_ptr])
         
-        for (wgt_row in 1:nrow(wgt_list)){
+        for (wgt_row in 1:nrow(wgt_list)) {
           iter_wgt = wgt_list[wgt_row,]
           var_list = mapply('*', iter_wgt * iter_sf, allvar_list[iter_ptr], SIMPLIFY = F)
           
@@ -95,7 +94,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
           # Computes the objective function for the variables and weights of the iteration
           iter_obj = calc_objective_function(var_list, type_list)
           
-          for (iter_tradeoff in tradeoff_lims){
+          for (iter_tradeoff in tradeoff_lims) {
             # Result file suffix for tradeoff curve loop
             iter_tradeoff_prt = paste0('_tradeofflim_', iter_tradeoff)
             if (cfg$scenarios$`sub-region_scenarios`$include_subregion_scenarios){
@@ -115,7 +114,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
             # Resets object storing the cumulative area restored in each refresh-step
             iter_res_cum = rep(0, length(master_index))
             
-            for (iter_refresh_lim in iter_refresh_points){
+            for (iter_refresh_lim in iter_refresh_points) {
               # Actual target to be sent to the solver, resized to a refresh-step
               iter_targets = iter_targets_tradeoff * iter_refresh_lim
               
@@ -125,7 +124,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
               # Name to save the resulting file for the solver call of the iteration
               iter_filename = paste0(iter_target_name, iter_ublim_prt, iter_scen_prt,
                            iter_wgt_prt, iter_tradeoff_prt, iter_refresh_prt)
-              if (verbose){print(iter_filename)}
+              if (verbose) {print(iter_filename)}
               
               iter_start = Sys.time()
               
@@ -152,7 +151,7 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
                 #}
                             
               # Refreshes variables (if the iteration's scenario have refresh steps)
-              if (length(iter_refresh_points) > 1){
+              if (length(iter_refresh_points) > 1) {
                 refreshed_vars = plangea_refresh_vars(cfg,
                                                       upper_env = mget(objects()),
                                                       verbose=verbose)

@@ -10,7 +10,7 @@ plangea_refresh_vars = function(cfg, upper_env, verbose=T){
   
   # Proceed to refresh BD variable if this function is being called from within
   # the plangea_scenario loop (iter_res_cum exists)
-  if (!is.null(upper_env$iter_res_cum)){
+  if (!is.null(upper_env$iter_res_cum)) {
     hab_iter_areas = update_hab(hab_now_areas = upper_env$hab_now_areas,
                                 restored_area = upper_env$iter_res_cum,
                                 prop_restore = upper_env$prop_restore,
