@@ -42,7 +42,7 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   # Harmonize data module ------------------------------------------------------
   source('plangea_harmonize.R')
   in_data = plangea_harmonize(cfg, config_json_filename = config_json_filename,
-                              verbose=T, force_comp = F)
+                              verbose=T, force_comp = T)
   
   
   # Process module -------------------------------------------------------------

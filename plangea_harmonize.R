@@ -27,17 +27,8 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                 verbose = verbose,
                                 force_comp = force_comp)
   
-  lu_vals = lu_res$lu_vals
-  lu_terr = lu_res$lu_terr
-  master_index = lu_res$master_index
-  terrestrial_index = lu_res$terrestrial_index
-  ub_vals = lu_res$ub_vals
-  overall_area = lu_res$overall_area
-  lu_class_types = lu_res$lu_class_types
-  px_area = lu_res$px_area
-  harmonize_log = lu_res$harmonize_log
-  update_flag = lu_res$update_flag
-  rm(lu_res)
+  # Unpacking lu_res variables
+  for (i in 1:length(lu_res)) {assign(names(lu_res)[i], lu_res[[i]])}
   
 
   # Sub-module: include ready variables into allvar_list -----------------------
@@ -49,10 +40,8 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                          verbose = verbose,
                                          force_comp = force_comp)
 
-  allvar_list = ready_res$allvar_list
-  harmonize_log = ready_res$harmonize_log
-  update_flag = ready_res$update_flag
-  rm(ready_res)
+  # Unpacking ready_res variables
+  for (i in 1:length(ready_res)) {assign(names(ready_res)[i], ready_res[[i]])}
 
   
   # Sub-module: opportunity cost -----------------------------------------------
@@ -65,10 +54,8 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                 verbose = verbose,
                                 force_comp = force_comp)
   
-  oc = oc_res$oc
-  harmonize_log = oc_res$harmonize_log
-  update_flag = oc_res$update_flag
-  rm(oc_res)
+  # Unpacking oc_res variables
+  for (i in 1:length(oc_res)) {assign(names(oc_res)[i], oc_res[[i]])}
 
   allvar_list[names(allvar_list) %in% cfg$variables$calc_oc$oc_variable_name] = list(oc)
     
@@ -83,10 +70,8 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                 verbose = verbose,
                                 force_comp = force_comp)
   
-  oa_vals = oa_res$oa_vals
-  harmonize_log = oa_res$harmonize_log
-  update_flag = oa_res$update_flag
-  rm(oa_res)
+  # Unpacking oa_res variables
+  for (i in 1:length(oa_res)) {assign(names(oa_res)[i], oa_res[[i]])}
     
   
   # Sub-module: sub-regions ----------------------------------------------------
@@ -101,13 +86,8 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                           verbose = verbose, 
                                           force_comp = force_comp)
     
-    sr_vals = sr_res$sr_vals
-    sr_tbl = sr_res$sr_tbl
-    sr_coefs = sr_res$sr_coefs
-    sr_targets = sr_res$sr_targets
-    harmonize_log = sr_res$harmonize_log
-    update_flag = sr_res$update_flag
-    rm(sr_res)    
+    # Unpacking sr_res variables
+    for (i in 1:length(sr_res)) {assign(names(sr_res)[i], sr_res[[i]])}   
   }
   
   
@@ -129,16 +109,8 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
                                 verbose = verbose,
                                 force_comp = force_comp)
 
-  bd = bd_res$bd
-  usphab_proc = bd_res$usphab_proc
-  usphab_index = bd_res$usphab_index 
-  species_index_list_proc = bd_res$species_index_list_proc
-  hab_now_areas = bd_res$hab_now_areas
-  hab_pot_areas = bd_res$hab_pot_areas
-  prop_restore = bd_res$prop_restore
-  harmonize_log = bd_res$harmonize_log
-  update_flag = bd_res$update_flag
-  rm(bd_res)
+  # Unpacking bd_res variables
+  for (i in 1:length(bd_res)) {assign(names(bd_res)[i], bd_res[[i]])}
 
   allvar_list[names(allvar_list) %in% cfg$variables$calc_bd$bd_variable_name] = list(bd)
 

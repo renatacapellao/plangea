@@ -14,22 +14,20 @@
 	},
 
 	"variables": {
-		"variable_names": ["cb", "bd", "oc", "ph"],   
-		"variable_types": ["B", "B", "C", "B"],  
-		"variable_weights": [1, [1, 10, 100, 1000], 1, [0.5, 1, 2]],
-		"variable_scaling_factor": ["", "", "", 1],
-		"ready_variables": [true, false, false, false],  
+		"variable_names": ["cb", "bd", "oc"],   
+		"variable_types": ["B", "B", "C"],  
+		"variable_weights": [1, [1, 10, 100, 1000], 1],
+		"variable_scaling_factor": ["", "", ""],
+		"ready_variables": [true, false, false],  
 		"ready_variables_raster_names": [
 		  "DELTA_C_BiomassSoil30cm_v12.1.tif",
-		  "",
 		  "",
 		  ""
 		  ],
 		"refresh_variables_script_names":[
 		  "",
 		  "",
-		  "",
-		  "calc_placeholder.R"
+		  ""
 		],
 		"calc_oc": {
 		  "oc_variable_name": "oc",
@@ -89,13 +87,13 @@
 	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_wetland.tif"
 	    ]
 	  },
-	  "area_scaling_factor": "1e4"
+	  "area_scaling_factor": ""
 	},
 
 	"scenarios": {
 		"problem_type": "R", 
-		"benchmark_scenarios": ["bd", "cb", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
-		"refresh_nsteps_per_benchmark": [1, 10, 1, 10, 1, 10, 10],
+		"benchmark_scenarios": ["cb", "bd", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
+		"refresh_nsteps_per_benchmark": [10, 10, 1, 10, 1, 10, 10],
 		"target_names": ["WRLD", "CBD"],
 		"target_areas_sqkm": ["", "4.3056e6"],
 		"tradeoff_curve_percent_step_size": 0.15,
