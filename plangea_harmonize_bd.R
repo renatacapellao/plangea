@@ -15,10 +15,10 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
   flag_log$bd = F
   
   # Stores info on files to be used
-  present_bd_info =   lapply(cfg$variables$calc_bd$bd_subfolders,
-                             function(x){file.info(dir(paste0(spp_dir,x), full.names = T))})
+  present_bd_info =  lapply(cfg$variables$calc_bd$bd_subfolders,
+                            function(x){file.info(dir(paste0(spp_dir,x), full.names = T))})
   
-  if (is.null(file_log$bd)){file_log$bd = present_bd_info}
+  if (is.null(file_log$bd)) {file_log$bd = present_bd_info}
   
   # Update checks
   # number of files is not the same
@@ -33,7 +33,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
   # Adding / updating 'bd' data to file_log (must be done *after* checks)
   file_log$bd = present_bd_info  
   
-  if (nfiles_check | ctimes_check | rds_check | dependencies | force_comp){
+  if (nfiles_check | ctimes_check | rds_check | dependencies | force_comp) {
     # Modifies control structures to indicate lu_res will be computed
     flag_log$bd = T
     
@@ -69,7 +69,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     
     # List of species-raster values
     spp_terr = c()
-    for (sf in cfg$variables$calc_bd$bd_subfolders){
+    for (sf in cfg$variables$calc_bd$bd_subfolders) {
       spp_terr = c(spp_terr, lapply(dir(paste0(spp_dir,sf), full.names=T),
                                     function(x){print(paste0('Loading raster ', x));
                                       load_raster(x, master_index=terrestrial_index)})) }
@@ -91,7 +91,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     usphab_index = lapply(1:nrow(usphab_proc), function(x){c()})
     
     # spid loop ----------------------------------------------------------
-    for (spid in spid_list){
+    for (spid in spid_list) {
       # Pointer in the rows of spp_table to select the iteration's spid
       spid_ptr = (spp_table[,names(spp_table) %in% cfg$variables$calc_bd$spp_table$spp_names_column] == spid)
       
@@ -110,7 +110,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
       
       # Potential habitat for spid ---------------------------------------------
       oa_terr = lu_terr[names(lu_terr) %in% names(oa_vals)] # building original areas to terrestrial_index
-      for (nat_lu in names(oa_terr)){ # adding proportion of oa_vals to each native LU in oa_terr
+      for (nat_lu in names(oa_terr)) { # adding proportion of oa_vals to each native LU in oa_terr
         oa_terr[[nat_lu]][terrestrial_index %in% master_index] = oa_vals[[nat_lu]]
       }
 

@@ -9,7 +9,7 @@ plangea_harmonize_master_index = function(cfg, file_log, flag_log, lu_ras, lu_au
   lu_check = flag_log$lu                                                     # land-use files were updated
   rds_check = (!file.exists(paste0(in_dir, 'master_index')))         # resulting data file not found
   
-  if (type_check | lu_check | rds_check | force_comp){
+  if (type_check | lu_check | rds_check | force_comp) {
     # Modifies control structures to indicate master_index will be computed
     flag_log$master = T
     
