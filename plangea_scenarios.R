@@ -138,6 +138,8 @@ plangea_scenarios = function(cfg, in_data, verbose=T){
               if (verbose){cat(paste('Solver time:', round(Sys.time() - iter_start, digits=2),
                                        '| Total time elapsed:', round(Sys.time() - start_time, digits=2),
                                        '\n'))}
+              
+              pigz_save(iter_res, file = paste0(run_dir, iter_filename))
 
               # Updates upper bounds to remove selected areas
               iter_ub = iter_ub - iter_res
