@@ -67,7 +67,7 @@ pigz_save = function(object, file, threads=parallel::detectCores()) {
     saveRDS(object, file = con)
     close(con)  
   } else {
-    save(file)
+    save(object, file = file)
   }
 }
 
@@ -79,6 +79,7 @@ pigz_load = function(file, threads=parallel::detectCores()) {
     return(object)  
   } else {
     load(file)
+    return(object)
   }
 }
 
