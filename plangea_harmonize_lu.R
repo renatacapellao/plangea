@@ -54,6 +54,7 @@ plangea_harmonize_lu = function(cfg, file_log, flag_log, verbose=T, force_comp=F
 
     # Create auxiliary results list
     lu_aux = list(lu_terr = lu_terr, terrestrial_index = terrestrial_index,
+                  terrestrial_areas = terrestrial_areas,
                   lu_class_types = lu_class_types)
     
     pigz_save(lu_ras, file = paste0(in_dir, 'lu_ras'))
