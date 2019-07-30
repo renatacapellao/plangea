@@ -1,0 +1,112 @@
+{
+	"io": {
+	  "base_path": "~/Documents/IIS_PROJECTS/plangea/example-global/",
+		"rawdata_relative_path": "rawdata/",
+		"lu_relative_path": "rawdata/land-use/",
+		"past_lu_relative_path": "rawdata/land-use/past/",
+		"ecoregions_relative_path": "rawdata/land-use/ecoregions/",
+		"variables_relative_path": "rawdata/variables/",
+		"species_relative_path": "rawdata/species/placeholder_for_dev/",
+		"processed_relative_path": "processed/",
+		"output_relative_path": "results/",
+		"solver_results_relative_path": "results/solver_runs/",
+		"post_processed_relative_path": "results/post_processed/"
+	},
+
+	"variables": {
+		"variable_names": ["cb", "bd", "oc"],   
+		"variable_types": ["B", "B", "C"],  
+		"variable_weights": [1, [1, 10, 100, 1000], 1],
+		"variable_scaling_factor": ["", "", ""],
+		"ready_variables": [true, false, false],  
+		"ready_variables_raster_names": [
+		  "DELTA_C_BiomassSoil30cm_v12.1.tif",
+		  "",
+		  ""
+		  ],
+		"refresh_variables_script_names":[
+		  "",
+		  "",
+		  ""
+		],
+		"calc_oc": {
+		  "oc_variable_name": "oc",
+		  "oc_names": ["occ", "ocg"],
+		  "corresponding_lu_classes": ["AGR", "CGR"],
+		  "oc_files": [
+		    "opportunity_costs_cropland_4.9km_Molweide.tif",
+		    "opportunity_costs_grassland_4.9km_Molweide.tif"
+		  ]
+		},
+		"calc_bd": {
+		  "bd_variable_name": "bd",
+		  "bd_classes": ["M", "A", "B"],
+		  "bd_subfolders": ["raster_mammals", "raster_amphibians", "raster_birds"],
+		  "spp_table": {
+		    "spp_filename": "Habitats_marginal_excluded_habitats_selected.csv",
+		    "spp_names_column": "taxonid",
+		    "lu_names_column": "habitat_class"
+		  },
+		  "z_std_dev": "0.1"
+		}
+	},
+
+	"landscape_features": {
+	  "land_use":{
+	    "class_names": ["FOR", "NGR", "SHR", "DES", "WET", "AGR", "CGR", "WAT", "ICE", "URB"],
+	  	"class_types": ["N", "N", "N", "N", "N", "A", "A", "I", "I", "I"],  
+	  	"classes_raster_names": [
+	  	  "ESA_landuse_300m_2015_forest_media_4.9km_Molweide.tif",
+	  	  "NatGrass_2015_4.9km_Moll.tif",
+	  	  "ESA_landuse_300m_2015_shrubland_media_4.9km_Molweide.tif",
+	  	  "ESA_landuse_300m_2015_desert_media_4.9km_Molweide.tif",
+	  	  "ESA_landuse_300m_2015_wetlands_media_4.9km_Molweide.tif",
+	  	  "crop_final.tif",
+	  	  "culgrass_final.tif",
+	  	  "ESA_landuse_300m_2015_water_media_4.9km_Molweide.tif",
+	  	  "ESA_landuse_300m_2015_ice_media_4.9km_Molweide.tif",
+	  	  "ESA_landuse_300m_2015_urban_media_4.9km_Molweide.tif"
+	  	]  
+	  },
+	  "original_areas":{
+	    "include_past": true,
+	    "past_class_names": ["DES", "FOR", "NGR", "SHR", "WET"],
+	    "past_raster_names":[
+	      "ESA_landuse_300m_1992_desert_media_4.9km_Molweide.tif",
+	      "ESA_landuse_300m_1992_forest_media_4.9km_Molweide.tif",
+	      "NatGrass_1992_4.9km_Moll.tif",
+	      "ESA_landuse_300m_1992_shrubland_media_4.9km_Molweide.tif",
+	      "ESA_landuse_300m_1992_wetlands_media_4.9km_Molweide.tif"
+	    ],
+	    "include_ecoregions": true,
+	    "ecoregions_raster_names": [
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_desert.tif",
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_forest.tif",
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_Nat_grass.tif",
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_Shrubland.tif",
+	      "Ecoregions2017_Eco_valueNames_4_9km_Molweide_reclassificado_wetland.tif"
+	    ]
+	  },
+	  "area_scaling_factor": ""
+	},
+
+	"scenarios": {
+		"problem_type": "R", 
+		"benchmark_scenarios": ["cb", "bd", "oc", ["cb", "bd"], ["cb","oc"], ["bd","oc"], ["cb", "bd", "oc"]],
+		"refresh_nsteps_per_benchmark": [1, 10, 1, 10, 1, 10, 10],
+		"target_names": ["WRLD", "CBD"],
+		"target_areas_sqkm": ["", "4.3056e6"],
+		"tradeoff_curve_percent_step_size": 0.15,
+		"tradeoff_curve_percent_nstep_range": [1, 20],
+		"sub-region_scenarios": {
+			"include_subregion_scenarios": false,
+			"sub-region_relative_path": "rawdata/subregions/",
+			"sub-region_raster_name": "countries-code.tif",
+			"sub-region_names_table": "countries-code.csv",
+			"sub-region_flat_targets": false,
+			"sub-region_flat_targets_limits": 1,
+			"sub-region_target_areas_sqkm": "restoration-constraints-per-country-total.csv" 
+		},
+		"upper_bounds_limits": [1]
+		}
+}

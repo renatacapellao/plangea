@@ -1,4 +1,11 @@
+*.Rproj
+*.Rproj.user
+*.Rhistory
+*.RData
+*.Ruserdata
+example-global/rawdata/
+example-global/processed/
+example-global/results/
+plangea_wrapper.R
+plangea_harmonize_subregions.R
 .Rproj.user
-.Rhistory
-.RData
-.Ruserdata

@@ -1,0 +1,6 @@
+Sys.setenv(OS = .Platform$OS.type)
+Sys.setenv(PLANGEA_VERSION = "0.1.0")
+.art <- readLines("plangea.txt", warn = F)
+cat(.art, sep = "\n"); cat("\n")
+message(paste0("Welcome to Plangea - version: ", Sys.getenv("PLANGEA_VERSION")))
+options(prompt = "> ")
