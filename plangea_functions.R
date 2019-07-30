@@ -72,7 +72,7 @@ pigz_save = function(object, file, threads=parallel::detectCores()) {
 }
 
 pigz_load = function(file, threads=parallel::detectCores()) {
-  if (Sys.getenv('OS') == 'windows') {
+  if (Sys.getenv('OS') == 'unix') {
     con = pipe(paste0("pigz -d -c -p", threads, " ", file))
     object <- readRDS(file = con)
     close(con)
