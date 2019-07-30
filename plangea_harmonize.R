@@ -30,6 +30,11 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   # Unpacking lu_res variables
   for (i in 1:length(lu_res)) {assign(names(lu_res)[i], lu_res[[i]])}
   
+  # Creating base/background raster (mask)
+  lu_aux = pigz_load(paste0(in_dir, 'lu_aux'))
+  base_ras = lu_aux$terrestrial_areas
+  base_ras[(base_ras>0)] = 0
+  rm(lu_aux)
 
   # Sub-module: include ready variables into allvar_list -----------------------
   source('plangea_harmonize_add_ready.R')

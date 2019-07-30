@@ -67,18 +67,19 @@ pigz_save = function(object, file, threads=parallel::detectCores()) {
     saveRDS(object, file = con)
     close(con)  
   } else {
-    save(file)
+    save(object, file = file)
   }
 }
 
 pigz_load = function(file, threads=parallel::detectCores()) {
-  if (Sys.getenv('OS') == 'windows') {
+  if (Sys.getenv('OS') == 'unix') {
     con = pipe(paste0("pigz -d -c -p", threads, " ", file))
     object <- readRDS(file = con)
     close(con)
     return(object)  
   } else {
     load(file)
+    return(object)
   }
 }
 
@@ -93,7 +94,7 @@ gen_wgt_list = function(in_wgts){
 
 }
 
-plot_vals = function(x_vals, base_ras, master_index){
+plot_vals = function(x_vals, base_ras = base_ras, master_index = master_index){
   #base_ras[!is.na(base_ras)] = 0
   base_ras[master_index] = x_vals
   plot(base_ras)
