@@ -62,16 +62,24 @@ load_raster = function(raster_path, master_index=NULL){
 }
 
 pigz_save = function(object, file, threads=parallel::detectCores()) {
-  con = pipe(paste0("pigz -1 -p", threads, " > ", file), "wb")
-  saveRDS(object, file = con)
-  close(con)
+  if (Sys.getenv('OS') == 'unix') {
+    con = pipe(paste0("pigz -1 -p", threads, " > ", file), "wb")
+    saveRDS(object, file = con)
+    close(con)  
+  } else {
+    save(file)
+  }
 }
 
 pigz_load = function(file, threads=parallel::detectCores()) {
-  con = pipe(paste0("pigz -d -c -p", threads, " ", file))
-  object <- readRDS(file = con)
-  close(con)
-  return(object)
+  if (Sys.getenv('OS') == 'windows') {
+    con = pipe(paste0("pigz -d -c -p", threads, " ", file))
+    object <- readRDS(file = con)
+    close(con)
+    return(object)  
+  } else {
+    load(file)
+  }
 }
 
 gen_usphab = function(n){
