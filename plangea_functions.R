@@ -1,10 +1,30 @@
 # PLANGEA FUNCTIONS -------------------------------------------------------
 
-library(raster)
-library(Rsymphony)
-library(Matrix)
-library(jsonlite)
-library(assertthat)
+if(!require("raster")) {
+  install.packages("raster")
+  library(raster)
+}
+
+if(!require("Rsymphony")) {
+  install.packages("Rsymphony")
+  library(Rsymphony)
+}
+
+if(!require("Matrix")) {
+  install.packages("Matrix")
+  library(Matrix)
+}
+
+if(!require("jsonlite")) {
+  install.packages("jsonlite")
+  library(jsonlite)
+}
+
+if(!require("assertthat")) {
+  install.packages("assertthat")
+  library(assertthat)
+}
+
 
 calc_sparable_area = function(projected_areas){
   # Computing overall sparable land vs demanded land
@@ -42,16 +62,25 @@ load_raster = function(raster_path, master_index=NULL){
 }
 
 pigz_save = function(object, file, threads=parallel::detectCores()) {
-  con = pipe(paste0("pigz -1 -p", threads, " > ", file), "wb")
-  saveRDS(object, file = con)
-  close(con)
+  if (Sys.getenv('OS') == 'unix') {
+    con = pipe(paste0("pigz -1 -p", threads, " > ", file), "wb")
+    saveRDS(object, file = con)
+    close(con)  
+  } else {
+    save(object, file = file)
+  }
 }
 
 pigz_load = function(file, threads=parallel::detectCores()) {
-  con = pipe(paste0("pigz -d -c -p", threads, " ", file))
-  object <- readRDS(file = con)
-  close(con)
-  return(object)
+  if (Sys.getenv('OS') == 'unix') {
+    con = pipe(paste0("pigz -d -c -p", threads, " ", file))
+    object <- readRDS(file = con)
+    close(con)
+    return(object)  
+  } else {
+    load(file)
+    return(object)
+  }
 }
 
 gen_usphab = function(n){
@@ -65,7 +94,7 @@ gen_wgt_list = function(in_wgts){
 
 }
 
-plot_vals = function(x_vals, base_ras, master_index){
+plot_vals = function(x_vals, base_ras = base_ras, master_index = master_index){
   #base_ras[!is.na(base_ras)] = 0
   base_ras[master_index] = x_vals
   plot(base_ras)
