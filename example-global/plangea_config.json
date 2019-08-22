@@ -1,12 +1,12 @@
 {
 	"io": {
-	  "base_path": "~/Documents/IIS_PROJECTS/plangea/example-global/",
-		"rawdata_relative_path": "rawdata/",
-		"lu_relative_path": "rawdata/land-use/",
-		"past_lu_relative_path": "rawdata/land-use/past/",
-		"ecoregions_relative_path": "rawdata/land-use/ecoregions/",
-		"variables_relative_path": "rawdata/variables/",
-		"species_relative_path": "rawdata/species/placeholder_for_dev/",
+	  "base_path": "~/plangea/example-global/",
+		"rawdata_path": "/dados/rawdata/",
+		"lu_relative_path": "land-use/",
+		"past_lu_relative_path": "land-use/past/",
+		"ecoregions_relative_path": "land-use/ecoregions/",
+		"variables_relative_path": "variables/",
+		"species_relative_path": "species/",
 		"processed_relative_path": "processed/",
 		"output_relative_path": "results/",
 		"solver_results_relative_path": "results/solver_runs/",
@@ -100,7 +100,7 @@
 		"tradeoff_curve_percent_nstep_range": [1, 20],
 		"sub-region_scenarios": {
 			"include_subregion_scenarios": false,
-			"sub-region_relative_path": "rawdata/subregions/",
+			"sub-region_relative_path": "subregions/",
 			"sub-region_raster_name": "countries-code.tif",
 			"sub-region_names_table": "countries-code.csv",
 			"sub-region_flat_targets": false,

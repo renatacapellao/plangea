@@ -61,6 +61,13 @@ load_raster = function(raster_path, master_index=NULL){
   return(res)
 }
 
+grep_raster_ext = function(names_list){
+  ext_list = c('.tif', '.asc')
+  res_index = (names_list == names_list)
+  for (ext in ext_list) {res_index = res_index | grepl(ext, names_list)}
+  return(names_list[res_index])
+}
+
 pigz_save = function(object, file, threads=parallel::detectCores()) {
   if (Sys.getenv('OS') == 'unix') {
     con = pipe(paste0("pigz -1 -p", threads, " > ", file), "wb")

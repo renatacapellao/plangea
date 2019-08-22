@@ -11,13 +11,13 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   # Directory names ---------------------------------------------------------
   # set the directory names from which to load all the data for the optimisation
   base_dir = cfg$io$base_path                                             # root directory
-  rawdata_dir = paste0(base_dir, cfg$io$rawdata_relative_path)                     # input raw data files
-  lu_dir = paste0(base_dir, cfg$io$lu_relative_path)                            # input land-use maps
-  past_lu_dir = paste0(base_dir, cfg$io$past_lu_relative_path)  # input past land-use maps
-  er_dir = paste0(base_dir, cfg$io$ecoregions_relative_path)    # input ecoregions / original LC maps
-  var_dir = paste0(base_dir, cfg$io$variables_relative_path)                    # input variables maps
-  spp_dir = paste0(base_dir, cfg$io$species_relative_path)                      # input species maps
-  sr_dir = paste0(base_dir, cfg$scenarios$`sub-region_scenarios`$`sub-region_relative_path`) # sub-regions data
+  rawdata_dir = paste0(cfg$io$rawdata_path)                     # input raw data files
+  lu_dir = paste0(rawdata_dir, cfg$io$lu_relative_path)                            # input land-use maps
+  past_lu_dir = paste0(rawdata_dir, cfg$io$past_lu_relative_path)  # input past land-use maps
+  er_dir = paste0(rawdata_dir, cfg$io$ecoregions_relative_path)    # input ecoregions / original LC maps
+  var_dir = paste0(rawdata_dir, cfg$io$variables_relative_path)                    # input variables maps
+  spp_dir = paste0(rawdata_dir, cfg$io$species_relative_path)                      # input species maps
+  sr_dir = paste0(rawdata_dir, cfg$scenarios$`sub-region_scenarios`$`sub-region_relative_path`) # sub-regions data
   in_dir = paste0(base_dir, cfg$io$processed_relative_path)                        # preprocessed Rdata
   out_dir = paste0(base_dir, cfg$io$output_relative_path)                          # root directory for all output files
   res_dir = paste0(base_dir, cfg$io$solver_results_relative_path)                   # directory for all solver runs

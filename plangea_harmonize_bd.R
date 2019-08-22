@@ -64,7 +64,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     
     # List of raster names, divided by BD-classes / subfolders 
     raster_names = lapply(cfg$variables$calc_bd$bd_subfolders,
-                          function(x){dir(paste0(spp_dir,x))})
+                          function(x){grep_raster_ext(dir(paste0(spp_dir,x)))} )
     names(raster_names) = cfg$variables$calc_bd$bd_classes
     
     # List of species-raster values
@@ -72,7 +72,8 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     for (sf in cfg$variables$calc_bd$bd_subfolders) {
       spp_terr = c(spp_terr, lapply(dir(paste0(spp_dir,sf), full.names=T),
                                     function(x){print(paste0('Loading raster ', x));
-                                      load_raster(x, master_index=terrestrial_index)})) }
+                                      load_raster(x, master_index=terrestrial_index)}))
+      }
     names(spp_terr) = sub(x=unlist(raster_names), pattern='.tif', replacement='')
     
     # Loading list of suitable land-uses for each species
