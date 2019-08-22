@@ -23,6 +23,7 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   res_dir = paste0(base_dir, cfg$io$solver_results_relative_path)                   # directory for all solver runs
   proc_dir = paste0(base_dir, cfg$io$post_processed_relative_path)                  # directory for all pre-processed files
   run_dir = paste0(res_dir, Sys.Date(), '/')                              # directory for current solver runs
+  scripts_dir = paste0(base_dir, cfg$io$extra_scripts_relative_path)      # directory for all extra scripts included
   
   if (!dir.exists(base_dir)) dir.create(base_dir)
   if (!dir.exists(rawdata_dir)) dir.create(rawdata_dir)
