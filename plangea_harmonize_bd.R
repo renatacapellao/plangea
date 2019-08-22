@@ -46,6 +46,14 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
                              ifelse(force_comp, 'because you said so! \n', '')
     ))}
     
+    # Sources external script for computing extra constraints to habitats
+    if (length(cfg$variables$calc_bd$calc_extra_constraints_script) > 1){
+      # The input script must add to the envir a function named spid_constr
+      # that receives spid as an input and returns a list of master_index size
+      # with suitable areas of habitat for that spid in each px of master_index
+      source(paste0(scripts_dir, cfg$variables$calc_bd$calc_extra_constraints_script))
+    } else {spid_constr = function(spid){1}}
+    
     # Pointer for native-vegetation classes
     nat_ptr = (cfg$landscape_features$land_use$class_types == "N")
     
@@ -106,8 +114,11 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
       spid_lu = spid_lu[spid_lu %in% nat_cls]
       
       # Current habitat for spid -----------------------------------------------
-      hab_now_terr = c(hab_now_terr, list(spp_terr[names(spp_terr) == spid][[1]] *  # species range for spid
-                                            Reduce('+', lu_terr[names(lu_terr) %in% spid_lu])))          # sum of suitable lu for spid
+      hab_now_terr = c(hab_now_terr, list(spp_terr[names(spp_terr) == spid][[1]] *              # species range for spid
+                                            Reduce('+', lu_terr[names(lu_terr) %in% spid_lu]) * # sum of suitable lu for spid
+                                            spid_constr(spid)                                   # extra constraints
+                                          )) 
+      
       
       # Potential habitat for spid ---------------------------------------------
       oa_terr = lu_terr[names(lu_terr) %in% names(oa_vals)] # building original areas to terrestrial_index
