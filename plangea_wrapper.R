@@ -1,4 +1,4 @@
-# WRAPPER FOR RUNNING PLANGEA BASED ON AN INPUT JSON CONFIG FILE ----------
+# WRAPPER FOR RUNNING PLANGEA BASED ON AN INPUT JSON CONFIG FILE ---------------
 
 
 plangea_wrapper = function(config_json_filename='./example-global/plangea_config.json'){
@@ -8,7 +8,7 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   # Read JSON config file
   cfg = fromJSON(config_json_filename)
   
-  # Directory names ---------------------------------------------------------
+  # Directory names ------------------------------------------------------------
   # set the directory names from which to load all the data for the optimisation
   base_dir = cfg$io$base_path                                             # root directory
   rawdata_dir = paste0(cfg$io$rawdata_path)                     # input raw data files
@@ -47,7 +47,6 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   
   
   # Process module -------------------------------------------------------------
-  
   #in_data = pigz_load('./example-global/processed/harmonize_full_envir')
   #lu_ras = pigz_load('./example-global/processed/lu_ras')
   #bg = lu_ras[[1]] / lu_ras[[1]]
@@ -57,8 +56,6 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   
   
   # Post-process module --------------------------------------------------------
-
-  
   return(res)
 }
 
