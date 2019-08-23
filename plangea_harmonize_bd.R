@@ -68,26 +68,35 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     
     # Number of rasters in each subfolder defined in the config json
     n_rasters = lapply(cfg$variables$calc_bd$bd_subfolders,
-                       function(x){length(dir(paste0(spp_dir,x)))})
+                       function(x){length(grep_raster_ext(dir(paste0(spp_dir,x))))})
     
     # List of raster names, divided by BD-classes / subfolders 
     raster_names = lapply(cfg$variables$calc_bd$bd_subfolders,
-                          function(x){dir(paste0(spp_dir,x))})
+                          function(x){grep_raster_ext(dir(paste0(spp_dir,x)))})
     names(raster_names) = cfg$variables$calc_bd$bd_classes
-    
-    # List of species-raster values
-    spp_terr = c()
+
+    # List of indices for the range of occurrence for each species w.r.t. the terrestrial_index
+    # (in here we must assume that the species rasters hold binary presence/absence information)
+    spp_terr_range = c()
     for (sf in cfg$variables$calc_bd$bd_subfolders) {
-      spp_terr = c(spp_terr, lapply(dir(paste0(spp_dir,sf), full.names=T),
-                                    function(x){print(paste0('Loading raster ', x));
-                                      load_raster(x, master_index=terrestrial_index)})) }
-    names(spp_terr) = sub(x=unlist(raster_names), pattern='.tif', replacement='')
+      #spp_terr = c(spp_terr, lapply(grep_raster_ext(dir(paste0(spp_dir,sf), full.names=T)),
+      #                              function(x){print(paste0('Loading raster ', x));
+      #                                load_raster(x, master_index=terrestrial_index)}))
+      sf_names = grep_raster_ext(dir(paste0(spp_dir,sf), full.names=T))
+      for (ras_name in sf_names){
+        print(paste0('Loading raster ', ras_name,' [', length(spp_terr_range)+1, ' of ',
+                     Reduce('+', n_rasters), '| loaded total: ',
+                     format(utils::object.size(spp_terr_range), units='auto', standard='SI') , ']'))
+        spp_terr_range[[length(spp_terr_range)+1]] = which(load_raster(ras_name, master_index=terrestrial_index) > 0)
+      }
+      }
+    names(spp_terr_range) = sub(x=unlist(raster_names), pattern='.tif', replacement='')
     
     # Loading list of suitable land-uses for each species
     spp_table = read.csv(paste0(spp_dir, cfg$variables$calc_bd$spp_table$spp_filename))
     
     # Creating list of species ID that have entries in both spp_terr and spp_table
-    spid_list = names(spp_terr)[names(spp_terr) %in%
+    spid_list = names(spp_terr_range)[names(spp_terr_range) %in%
                                   unique(spp_table[,names(spp_table) %in%
                                                      cfg$variables$calc_bd$spp_table$spp_names_column])]
     
@@ -112,8 +121,13 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
       # Keeping in spid_lu only entries listed as native classes in nat_cls
       spid_lu = spid_lu[spid_lu %in% nat_cls]
       
+      # Reconstruct species terrestrial vector
+      spid_terr = rep(0, length(terrestrial_index))
+      spid_terr_range = spp_terr_range[names(spp_terr_range) == spid][[1]]
+      spid_terr[spid_terr_range] = 1
+      
       # Current habitat for spid -----------------------------------------------
-      hab_now_terr = c(hab_now_terr, list(spp_terr[names(spp_terr) == spid][[1]] *              # species range for spid
+      hab_now_terr = c(hab_now_terr, list(spid_terr *                                           # species range for spid
                                             Reduce('+', lu_terr[names(lu_terr) %in% spid_lu]) * # sum of suitable lu for spid
                                             spid_constr(spid)                                   # extra constraints
                                           )) 
@@ -126,8 +140,10 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
       }
 
       hab_pot_terr = c(hab_pot_terr,
-                       list(spp_terr[names(spp_terr) == spid][[1]] *  # species range for spid
-                                            Reduce('+', oa_terr[names(oa_terr) %in% spid_lu]))) # sum of suitable lu for spid
+                       list(spid_terr *                                                   # species range for spid
+                              Reduce('+', oa_terr[names(oa_terr) %in% spid_lu]) *         # sum of suitable lu for spid
+                              spid_constr(spid)                                           # extra constraints
+                            ))
       
       # usphab_index computation -----------------------------------------------    
       # Corresponding entry on usphab_proc rows for spid
@@ -145,7 +161,14 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     
     # List of indices in which each species occur, subsetted to master_index ---
     #species_index_list_proc = lapply(spp_terr, function(x){which((x==1) & (terrestrial_index %in% master_index))})
-    species_index_list_proc = lapply(spp_terr, function(x){x=x[terrestrial_index %in% master_index]; which(x==1)})
+    species_index_list_proc = lapply(spp_terr_range,
+                                     function(x){
+                                       spp_range = rep(0, length(terrestrial_index))
+                                       spp_range[x] = 1
+                                       spp_range = spp_range[terrestrial_index %in% master_index]
+                                       return(which(spp_range==1))
+                                       }
+                                     )
     
     hab_now_areas = sapply(hab_now_terr, sum)
     hab_pot_areas = sapply(hab_pot_terr, sum)
