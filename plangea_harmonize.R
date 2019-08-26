@@ -106,13 +106,13 @@ plangea_harmonize = function(cfg, config_json_filename, verbose=F, force_comp = 
   # Sub-module: biodiversity ---------------------------------------------------
   source('plangea_harmonize_bd.R')
   
-  bd_res = plangea_harmonize_bd(cfg, file_log = harmonize_log,
-                                flag_log = update_flag, lu_terr = lu_terr,
-                                master_index = master_index,
-                                terrestrial_index = terrestrial_index,
-                                oa_vals = oa_vals,
-                                verbose = verbose,
-                                force_comp = force_comp)
+    bd_res = plangea_harmonize_bd(cfg, file_log = harmonize_log,
+                                  flag_log = update_flag, lu_terr = lu_terr,
+                                  master_index = master_index,
+                                  terrestrial_index = terrestrial_index,
+                                  oa_vals = oa_vals,
+                                  verbose = verbose,
+                                  force_comp = force_comp)
 
   # Unpacking bd_res variables
   for (i in 1:length(bd_res)) {assign(names(bd_res)[i], bd_res[[i]])}
