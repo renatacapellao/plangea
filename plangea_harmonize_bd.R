@@ -77,25 +77,34 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
 
     # List of indices for the range of occurrence for each species w.r.t. the terrestrial_index
     # (in here we must assume that the species rasters hold binary presence/absence information)
-    spp_terr_range = c()
+    spp_terr_range = c()            # occurrence indices w.r.t. terrestrial_index
+    species_index_list_proc = c()   # 0/1 occurrence values for all pixels in master_index
     for (sf in cfg$variables$calc_bd$bd_subfolders) {
       #spp_terr = c(spp_terr, lapply(grep_raster_ext(dir(paste0(spp_dir,sf), full.names=T)),
       #                              function(x){print(paste0('Loading raster ', x));
       #                                load_raster(x, master_index=terrestrial_index)}))
-      sf_names = grep_raster_ext(dir(paste0(spp_dir,sf), full.names=T))
+      sf_names = grep_raster_ext(dir(paste0(spp_dir, sf), full.names=T))
       for (ras_name in sf_names){
         print(paste0('Loading raster ', ras_name,' [', length(spp_terr_range)+1, ' of ',
-                     Reduce('+', n_rasters), '| loaded total: ',
+                     Reduce('+', n_rasters), ' | loaded total: ',
                      format(utils::object.size(spp_terr_range), units='auto', standard='SI') , ']'))
-        spp_terr_range[[length(spp_terr_range)+1]] = which(load_raster(ras_name, master_index=terrestrial_index) > 0)
+        ras_terr = load_raster(ras_name, master_index=terrestrial_index)
+        spp_terr_range[[length(spp_terr_range)+1]] = which(ras_terr > 0)
+        species_index_list_proc[[length(species_index_list_proc)+1]] = ras_terr[terrestrial_index %in% master_index]
       }
       }
-    names(spp_terr_range) = sub(x=unlist(raster_names), pattern='.tif', replacement='')
+    names(spp_terr_range) = unlist(lapply(raster_names, tools::file_path_sans_ext))
+    names(species_index_list_proc) = names(spp_terr_range)
+    
+    # Remove entries from defect rasters
+    defect.ptr = (lapply(spp_terr_range, length) == 0)
+    spp_terr_range = spp_terr_range[!defect.ptr]
+    species_index_list_proc = species_index_list_proc[!defect.ptr]
     
     # Loading list of suitable land-uses for each species
     spp_table = read.csv(paste0(spp_dir, cfg$variables$calc_bd$spp_table$spp_filename))
     
-    # Creating list of species ID that have entries in both spp_terr and spp_table
+    # Creating list of species ID that have entries in both spp_terr_range and spp_table
     spid_list = names(spp_terr_range)[names(spp_terr_range) %in%
                                   unique(spp_table[,names(spp_table) %in%
                                                      cfg$variables$calc_bd$spp_table$spp_names_column])]
@@ -108,7 +117,12 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     usphab_index = lapply(1:nrow(usphab_proc), function(x){c()})
     
     # spid loop ----------------------------------------------------------
+    spid_count = 0
     for (spid in spid_list) {
+      if (verbose){spid_count = spid_count + 1
+      print(paste0('Computing habitats for species ID ', spid, ' [', spid_count, ' of ', length(spid_list),']'))
+      }
+      
       # Pointer in the rows of spp_table to select the iteration's spid
       spid_ptr = (spp_table[,names(spp_table) %in% cfg$variables$calc_bd$spp_table$spp_names_column] == spid)
       
@@ -159,16 +173,17 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     names(hab_now_terr) = spid_list
     names(hab_pot_terr) = spid_list
     
-    # List of indices in which each species occur, subsetted to master_index ---
+    # List of indices in which each species occur, subsetted to master_index
+    # (outdated: moved this part to the loop where spp_terr_range is also computed)
     #species_index_list_proc = lapply(spp_terr, function(x){which((x==1) & (terrestrial_index %in% master_index))})
-    species_index_list_proc = lapply(spp_terr_range,
-                                     function(x){
-                                       spp_range = rep(0, length(terrestrial_index))
-                                       spp_range[x] = 1
-                                       spp_range = spp_range[terrestrial_index %in% master_index]
-                                       return(which(spp_range==1))
-                                       }
-                                     )
+    #species_index_list_proc = lapply(spp_terr_range,
+    #                                 function(x){
+    #                                   spp_range = rep(0, length(terrestrial_index))
+    #                                   spp_range[x] = 1
+    #                                   spp_range = spp_range[terrestrial_index %in% master_index]
+    #                                   return(which(spp_range==1))
+    #                                   }
+    #                                 )
     
     hab_now_areas = sapply(hab_now_terr, sum)
     hab_pot_areas = sapply(hab_pot_terr, sum)
