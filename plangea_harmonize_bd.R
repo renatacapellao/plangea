@@ -89,8 +89,8 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
                      Reduce('+', n_rasters), ' | loaded total: ',
                      format(utils::object.size(spp_terr_range), units='auto', standard='SI') , ']'))
         ras_terr = load_raster(ras_name, master_index=terrestrial_index)
-        spp_terr_range[[length(spp_terr_range)+1]] = which(ras_terr > 0)
-        species_index_list_proc[[length(species_index_list_proc)+1]] = ras_terr[terrestrial_index %in% master_index]
+        spp_terr_range[[length(spp_terr_range)+1]] = list(which(ras_terr > 0))
+        species_index_list_proc[[length(species_index_list_proc)+1]] = list(ras_terr[terrestrial_index %in% master_index])
       }
       }
     names(spp_terr_range) = unlist(lapply(raster_names, tools::file_path_sans_ext))
@@ -197,6 +197,7 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     hab_now_areas = hab_now_areas[valid_spid_ptr]
     hab_pot_areas = hab_pot_areas[valid_spid_ptr]
     
+    if (verbose){print('Computing layer for t0 benefits for biodiversity (bd)')}
     bd = calc_bd(slp = calc_extinction_slope(hab_now_areas, hab_pot_areas),
                  prop_restore, usphab_proc, usphab_index,
                  species_index_list_proc)
