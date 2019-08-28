@@ -38,6 +38,7 @@ plangea_wrapper = function(config_json_filename='./example-global/plangea_config
   if (!dir.exists(res_dir)) dir.create(res_dir)
   if (!dir.exists(proc_dir)) dir.create(proc_dir)
   if (!dir.exists(run_dir)) dir.create(run_dir)
+  if (!dir.exists(scripts_dir)) dir.create(scripts_dir)
 
   
   # Harmonize data module ------------------------------------------------------
