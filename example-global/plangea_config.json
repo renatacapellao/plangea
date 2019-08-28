@@ -1,7 +1,7 @@
 {
 	"io": {
-	  "base_path": "~/plangea/example-global/",
-		"rawdata_path": "/dados/rawdata/",
+	  "base_path": "~/Documents/IIS_PROJECTS/plangea/example-global/",
+		"rawdata_path": "~/Documents/IIS_PROJECTS/plangea/example-global/rawdata/",
 		"lu_relative_path": "land-use/",
 		"past_lu_relative_path": "land-use/past/",
 		"ecoregions_relative_path": "land-use/ecoregions/",
@@ -10,7 +10,8 @@
 		"processed_relative_path": "processed/",
 		"output_relative_path": "results/",
 		"solver_results_relative_path": "results/solver_runs/",
-		"post_processed_relative_path": "results/post_processed/"
+		"post_processed_relative_path": "results/post_processed/",
+		"extra_scripts_relative_path": "scripts/"
 	},
 
 	"variables": {
@@ -47,6 +48,7 @@
 		    "spp_names_column": "taxonid",
 		    "lu_names_column": "habitat_class"
 		  },
+		  "calc_extra_constraints_script": "",
 		  "z_std_dev": "0.1"
 		}
 	},
