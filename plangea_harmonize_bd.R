@@ -75,16 +75,24 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
                           function(x){grep_raster_ext(dir(paste0(spp_dir,x)))})
     names(raster_names) = cfg$variables$calc_bd$bd_classes
 
-    # List of indices for the range of occurrence for each species w.r.t. the terrestrial_index
-    # (in here we must assume that the species rasters hold binary presence/absence information)
+    # Load rasters loop --------------------------------------------------------
+    last_loaded_folder = 1
     spp_terr_range = c()            # occurrence indices w.r.t. (TERR)estrial_index
     spp_main_range = c()            # occurrence indices w.r.t. (MA)ster_(IN)dex
-    for (sf in cfg$variables$calc_bd$bd_subfolders) {
-      #spp_terr = c(spp_terr, lapply(grep_raster_ext(dir(paste0(spp_dir,sf), full.names=T)),
-      #                              function(x){print(paste0('Loading raster ', x));
-      #                                load_raster(x, master_index=terrestrial_index)}))
+    
+    if (file.exists(paste0(in_dir, 'load_spp'))){
+      pigz_load(file = paste0(in_dir, 'load_spp'))
+      if ((sum(unlist(lapply(present_bd_info, nrow), use.names = F) != unlist(lapply(load_spp$present_bd_info, nrow), nrow,use.names = F)) == 0) &
+          (sum(unlist(lapply(present_bd_info, function(x){x$ctime}), use.names = F) >
+               unlist(lapply(load_spp$present_bd_info, function(x){x$ctime}), nrow,use.names = F)) == 0) ){ #checks consistency with file info from load_spp
+        for (i in 1:length(load_spp)) {assign(names(load_spp)[i], load_spp[[i]])}       # assigns objects in load_spp to the function's env
+        }
+    }
+    
+    for (sf in cfg$variables$calc_bd$bd_subfolders[last_loaded_folder:length(cfg$variables$calc_bd$bd_subfolders)]) {
       sf_names = grep_raster_ext(dir(paste0(spp_dir, sf), full.names=T))
-      for (ras_name in sf_names){
+      last_loaded_spp = 1
+      for (ras_name in sf_names[last_loaded_spp:length(sf_names)]){
         print(paste0('Loading raster ', ras_name,' [', length(spp_terr_range)+1, ' of ',
                      Reduce('+', n_rasters), ' | stored total: ',
                      format(utils::object.size(spp_terr_range) +
@@ -95,8 +103,20 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
         ras_main = ras_terr[terrestrial_index %in% master_index]
         spp_main_range[[length(spp_main_range)+1]] = which(ras_main > 0)
         #species_index_list_proc[[length(species_index_list_proc)+1]] = ras_terr[terrestrial_index %in% master_index]
+        # Save every 100 rasters loaded a log of rasters loaded to allow for resume in case of a crash
+        if(last_loaded_spp %% 100 == 0){
+          if (verbose){print(paste0('--- Saving intermediate results ---'))}
+          load_spp = list(present_bd_info = present_bd_info,
+                          last_loaded_folder = last_loaded_folder,
+                          last_loaded_spp = last_loaded_spp,
+                          spp_terr_range = spp_terr_range,
+                          spp_main_range = spp_main_range)
+          pigz_save(load_spp_log, file = paste0(in_dir, 'load_spp'))
+        }
+        last_loaded_spp = last_loaded_spp + 1
       }
-      }
+      last_loaded_folder = last_loaded_folder + 1
+    }
     names(spp_terr_range) = unlist(lapply(raster_names, tools::file_path_sans_ext))
     names(spp_main_range) = unlist(lapply(raster_names, tools::file_path_sans_ext))
     
@@ -104,7 +124,6 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     defect.ptr = (lapply(spp_main_range, length) == 0)
     spp_terr_range = spp_terr_range[!defect.ptr]
     spp_main_range = spp_main_range[!defect.ptr]
-
     
     # Loading list of suitable land-uses for each species
     spp_table = read.csv(paste0(spp_dir, cfg$variables$calc_bd$spp_table$spp_filename))
@@ -121,10 +140,21 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     # Start list of spids corresponding to each unique combination of suitable LUs in usphab_proc
     usphab_index = lapply(1:nrow(usphab_proc), function(x){c()})
     
-    # spid loop ----------------------------------------------------------
-    spid_count = 0
-    for (spid in spid_list) {
-      if (verbose){spid_count = spid_count + 1
+    
+    # spid loop ----------------------------------------------------------------
+    spid_count = 1
+    
+    if (file.exists(paste0(in_dir, 'hab_comp'))){
+      pigz_load(file = paste0(in_dir, 'hab_comp'))
+      if ((sum(unlist(lapply(present_bd_info, nrow), use.names = F) != unlist(lapply(hab_comp$present_bd_info, nrow), nrow,use.names = F)) == 0) &
+          (sum(unlist(lapply(present_bd_info, function(x){x$ctime}), use.names = F) >
+               unlist(lapply(hab_comp$present_bd_info, function(x){x$ctime}), nrow,use.names = F)) == 0) ){ #checks consistency with file info from hab_comp
+        for (i in 1:length(hab_comp)) {assign(names(hab_comp)[i], hab_comp[[i]])}       # assigns objects in hab_comp to the function's env
+      }
+    }
+
+    for (spid in spid_list[spid_count:length(spid_list)]) {
+      if (verbose){
       print(paste0('Computing habitats for species ID ', spid, ' [', spid_count, ' of ', length(spid_list),']'))
       }
       
@@ -174,7 +204,19 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
       
       # Adding the spid to the corresponding entry in usphab_index
       usphab_index[spid_proc_row] = list(c(unlist(usphab_index[spid_proc_row]), spid))
-    }
+      
+      # Save every 100 habitats computed intermediate results to allow for resume in case of a crash
+      if(spid_count %% 100 == 0){
+        if (verbose){print(paste0('--- Saving intermediate results ---'))}
+        hab_comp = list(present_bd_info = present_bd_info,
+                        spid_count = spid_count,
+                        hab_now_terr = hab_now_terr,
+                        hab_pot_terr = hab_pot_terr,
+                        usphab_index = usphab_index)
+        pigz_save(load_spp_log, file = paste0(in_dir, 'load_spp'))
+      }
+      spid_count = spid_count + 1
+    } # end of spid_list loop
     names(hab_now_terr) = spid_list
     names(hab_pot_terr) = spid_list
     
