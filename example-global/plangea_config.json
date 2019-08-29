@@ -6,7 +6,7 @@
 		"past_lu_relative_path": "land-use/past/",
 		"ecoregions_relative_path": "land-use/ecoregions/",
 		"variables_relative_path": "variables/",
-		"species_relative_path": "species/placeholder_for_dev/",
+		"species_relative_path": "species/",
 		"processed_relative_path": "processed/",
 		"output_relative_path": "results/",
 		"solver_results_relative_path": "results/solver_runs/",

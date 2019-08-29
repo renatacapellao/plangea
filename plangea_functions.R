@@ -139,7 +139,7 @@ update_hab = function(hab_now_areas, restored_area, prop_restore, usphab_proc,
 
 # Legacy calc_bd ------------------------------------------------------------
 calc_bd = function(slp, prop_restore, usphab_proc, usphab_index,
-                    species_index_list_proc, restored_area = NULL){
+                    spp_main_range, restored_area = NULL){
   bd = rep(0, nrow(prop_restore))
   if (!is.null(restored_area)) {prop_restore = prop_restore - (restored_area/ncol(prop_restore))}
   for (i in 1:dim(usphab_proc)[1]) {
@@ -147,8 +147,8 @@ calc_bd = function(slp, prop_restore, usphab_proc, usphab_index,
     if (length(usphab_index[[i]])>0) {
       for (j in 1:length(usphab_index[[i]])) {
         #print(paste(i, j, length(bd), length(bd[recs]+slp[usphab_index[[i]][j]]*hab_values[recs])))
-        if (!is.null(species_index_list_proc[[usphab_index[[i]][j]]])) {
-          recs = species_index_list_proc[[usphab_index[[i]][j]]]
+        if (!is.null(spp_main_range[[usphab_index[[i]][j]]])) {
+          recs = spp_main_range[[usphab_index[[i]][j]]]
           bd[recs] = bd[recs] + slp[usphab_index[[i]][j]] * hab_values[recs]
         }
       }      

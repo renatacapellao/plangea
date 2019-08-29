@@ -77,8 +77,8 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
 
     # List of indices for the range of occurrence for each species w.r.t. the terrestrial_index
     # (in here we must assume that the species rasters hold binary presence/absence information)
-    spp_terr_range = c()            # occurrence indices w.r.t. terrestrial_index
-    species_index_list_proc = c()   # 0/1 occurrence values for all pixels in master_index
+    spp_terr_range = c()            # occurrence indices w.r.t. (TERR)estrial_index
+    spp_main_range = c()            # occurrence indices w.r.t. (MA)ster_(IN)dex
     for (sf in cfg$variables$calc_bd$bd_subfolders) {
       #spp_terr = c(spp_terr, lapply(grep_raster_ext(dir(paste0(spp_dir,sf), full.names=T)),
       #                              function(x){print(paste0('Loading raster ', x));
@@ -86,20 +86,25 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
       sf_names = grep_raster_ext(dir(paste0(spp_dir, sf), full.names=T))
       for (ras_name in sf_names){
         print(paste0('Loading raster ', ras_name,' [', length(spp_terr_range)+1, ' of ',
-                     Reduce('+', n_rasters), ' | loaded total: ',
-                     format(utils::object.size(spp_terr_range), units='auto', standard='SI') , ']'))
+                     Reduce('+', n_rasters), ' | stored total: ',
+                     format(utils::object.size(spp_terr_range) +
+                              utils::object.size(spp_main_range),
+                            units='auto', standard='SI') , ']'))
         ras_terr = load_raster(ras_name, master_index=terrestrial_index)
-        spp_terr_range[[length(spp_terr_range)+1]] = list(which(ras_terr > 0))
-        species_index_list_proc[[length(species_index_list_proc)+1]] = list(ras_terr[terrestrial_index %in% master_index])
+        spp_terr_range[[length(spp_terr_range)+1]] = which(ras_terr > 0)
+        ras_main = ras_terr[terrestrial_index %in% master_index]
+        spp_main_range[[length(spp_main_range)+1]] = which(ras_main > 0)
+        #species_index_list_proc[[length(species_index_list_proc)+1]] = ras_terr[terrestrial_index %in% master_index]
       }
       }
     names(spp_terr_range) = unlist(lapply(raster_names, tools::file_path_sans_ext))
-    names(species_index_list_proc) = names(spp_terr_range)
+    names(spp_main_range) = unlist(lapply(raster_names, tools::file_path_sans_ext))
     
     # Remove entries from defect rasters
-    defect.ptr = (lapply(spp_terr_range, length) == 0)
+    defect.ptr = (lapply(spp_main_range, length) == 0)
     spp_terr_range = spp_terr_range[!defect.ptr]
-    species_index_list_proc = species_index_list_proc[!defect.ptr]
+    spp_main_range = spp_main_range[!defect.ptr]
+
     
     # Loading list of suitable land-uses for each species
     spp_table = read.csv(paste0(spp_dir, cfg$variables$calc_bd$spp_table$spp_filename))
@@ -193,17 +198,19 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     
     # Subsetting output species variables for only species with valid habitats
     usphab_index = lapply(usphab_index, function(x){x[x %in% spid_list[valid_spid_ptr]]})
-    species_index_list_proc = species_index_list_proc[valid_spid_ptr]
+    #species_index_list_proc = species_index_list_proc[valid_spid_ptr]
+    spp_main_range = spp_main_range[valid_spid_ptr]
     hab_now_areas = hab_now_areas[valid_spid_ptr]
     hab_pot_areas = hab_pot_areas[valid_spid_ptr]
     
     if (verbose){print('Computing layer for t0 benefits for biodiversity (bd)')}
     bd = calc_bd(slp = calc_extinction_slope(hab_now_areas, hab_pot_areas),
                  prop_restore, usphab_proc, usphab_index,
-                 species_index_list_proc)
+                 spp_main_range)
 
     bd_aux = list(bd = bd, usphab_index = usphab_index, 
-                  species_index_list_proc = species_index_list_proc,
+                  spp_terr_range = spp_terr_range,
+                  spp_main_range = spp_main_range,
                   hab_now_areas = hab_now_areas, hab_pot_areas = hab_pot_areas,
                   prop_restore = prop_restore)
     
@@ -215,14 +222,16 @@ plangea_harmonize_bd = function(cfg, file_log, flag_log, lu_terr,
     bd = bd_aux$bd
     usphab_index = bd_aux$usphab_index 
     usphab_proc = bd_aux$usphab_proc
-    species_index_list_proc = bd_aux$species_index_list_proc
+    #species_index_list_proc = bd_aux$species_index_list_proc
+    spp_terr_range = bd_aux$spp_terr_range
+    spp_main_range = bd_aux$spp_main_range
     hab_now_areas = bd_aux$hab_now_areas
     hab_pot_areas = bd_aux$hab_pot_areas
     prop_restore = bd_aux$prop_restore
     }
 
   bd_res = list(bd = bd, usphab_index = usphab_index, usphab_proc = usphab_proc,
-                species_index_list_proc = species_index_list_proc,
+                spp_terr_range = spp_terr_range, spp_main_range = spp_main_range,
                 hab_now_areas = hab_now_areas, hab_pot_areas = hab_pot_areas,
                 prop_restore = prop_restore,
                 harmonize_log = file_log, update_flag = flag_log)
